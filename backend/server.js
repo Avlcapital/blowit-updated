@@ -1,0 +1,32 @@
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import morgan from "morgan";
+import connectDB from "./config/db.js";
+
+import authRoutes from "./routes/authRoutes.js";
+import vehicleRoutes from "./routes/vehicleRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
+
+dotenv.config();
+connectDB();
+
+const app = express();
+
+app.use(express.json());
+app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
+app.use(morgan("dev"));
+
+// Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/payments", paymentRoutes);
+
+// Default
+app.get("/", (req, res) => res.send("Blowit API is running..."));
+
+// Server
+const PORT = process.env.PORT || 4141;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
