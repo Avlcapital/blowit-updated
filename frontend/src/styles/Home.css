@@ -264,38 +264,89 @@
   cursor: pointer;
 }
 
-/* === PROMO SECTION === */
-.promo {
+/* === WHY CHOOSE US SECTION === */
+.why-choose {
+  width: 100%;
+  padding: 5rem 5%;
+  background: #f9f9f9;
+  color: #111;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #111;
-  color: #fff;
-  padding: 4rem 5%;
-  flex-wrap: wrap;
+  justify-content: center;
 }
-.promo-content {
-  flex: 1;
-  max-width: 500px;
+
+.why-container {
+  max-width: 1200px;
+  width: 100%;
+  text-align: center;
 }
-.promo-content h2 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
+
+.why-subtitle {
+  color: #555;
+  font-size: 1.1rem;
+  margin-bottom: 3rem;
 }
-.promo-content p {
-  color: #ddd;
+
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.why-card {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.why-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 35px rgba(0, 0, 0, 0.1);
+}
+
+.why-card img {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
   margin-bottom: 1.5rem;
 }
-.promo-btn {
-  background: #007bff;
-  color: #fff;
-  text-decoration: none;
-  padding: 0.8rem 1.6rem;
-  border-radius: 5px;
+
+.why-card h3 {
+  color: #007bff;
+  margin-bottom: 0.8rem;
+  font-size: 1.25rem;
 }
-.promo-image img {
-  width: 450px;
-  max-width: 100%;
+
+.why-card p {
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* === Responsive Adjustments === */
+@media (max-width: 768px) {
+  .why-choose {
+    padding: 4rem 8%;
+  }
+
+  .why-card {
+    padding: 1.5rem;
+  }
+
+  .why-card img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .why-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .why-card p {
+    font-size: 0.9rem;
+  }
 }
 
 /* === RESPONSIVE === */

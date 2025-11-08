@@ -85,20 +85,44 @@ const Home = () => {
         </div>
       </section>
 
-      {/* PROMO SECTION */}
-      <section className="promo">
-        <div className="promo-content">
-          <h2>50% Financing for Everyone</h2>
-          <p>
-            Blowit and AVLC make car ownership easy. We finance half your purchase,
-            handle clearance and registration, and deliver your car to Mombasa Port.
-          </p>
-          <Link to="/register" className="promo-btn">Get Started</Link>
-        </div>
-        <div className="promo-image">
-          <img src="/images/tesla.png" alt="Tesla Car" />
-        </div>
-      </section>
+      {/* WHY CHOOSE US SECTION */}
+<section className="why-choose">
+  <div className="why-container">
+    <h2 className="section-title">Why Choose Blowit?</h2>
+    <p className="why-subtitle">
+      Trusted Be Forward Agent in Kenya — bringing Japan’s best vehicles right to your doorstep.
+    </p>
+
+    <div className="why-grid">
+      <div className="why-card">
+        <img src="/images/authentic.png" alt="Authenticity Guaranteed" />
+        <h3>Authenticity Guaranteed</h3>
+        <p>
+          We source directly from Japan’s No.1 trusted automobile export company — <strong>Be Forward</strong>.
+          Every vehicle comes verified with accurate documentation, mileage, and condition reports.
+        </p>
+      </div>
+
+      <div className="why-card">
+        <img src="/images/fast.png" alt="Fast Turnaround" />
+        <h3>Fast Turnaround</h3>
+        <p>
+          Enjoy quick delivery from <strong>Yokohama</strong>, <strong>Nagoya</strong>, or <strong>Kobe</strong> ports
+          to Mombasa — or even directly to your doorstep in <strong>Nairobi, Nyeri, or Kisumu</strong>.
+        </p>
+      </div>
+
+      <div className="why-card">
+        <img src="/images/support.png" alt="End-to-End Support" />
+        <h3>End-to-End Support</h3>
+        <p>
+          From car selection to clearance and financing, we handle every step with AVLC’s trusted 50% financing option
+          — ensuring a smooth and transparent process.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
     </Layout>
   );
 };
