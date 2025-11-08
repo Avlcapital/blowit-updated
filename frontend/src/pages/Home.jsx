@@ -8,36 +8,39 @@ const Home = () => {
   return (
     <Layout>
       {/* HERO SECTION */}
-      <section className="hero">
-        <div className="hero-overlay">
-          <div className="hero-text">
-            <h1>Buy Premium Cars from Japan</h1>
-            <p>
-              Purchase your next car through Blowit — the exclusive Be Forward
-              agent in Kenya. Pay 50% deposit, and AVLC finances the rest.
-            </p>
-          </div>
+<section className="hero">
+  <div className="hero-overlay">
+    <div className="hero-inner">
+      <div className="hero-text">
+        <h1>Buy Premium Cars from Japan</h1>
+        <p>
+          Purchase your next car through Blowit — the exclusive Be Forward
+          agent in Kenya. Pay <strong>50% deposit</strong>, and AVLC finances
+          the rest.
+        </p>
+      </div>
 
-          <div className="hero-search">
-            <div className="search-fields">
-              <input type="text" placeholder="Search Make / Model" />
-              <select>
-                <option>All Years</option>
-                <option>2025</option>
-                <option>2024</option>
-                <option>2023</option>
-              </select>
-              <select>
-                <option>All Prices</option>
-                <option>Below KES 2M</option>
-                <option>KES 2M - 5M</option>
-                <option>Above KES 5M</option>
-              </select>
-              <button>Search</button>
-            </div>
-          </div>
+      <div className="hero-search">
+        <div className="search-fields">
+          <input type="text" placeholder="Search Make / Model" />
+          <select>
+            <option>All Years</option>
+            <option>2025</option>
+            <option>2024</option>
+            <option>2023</option>
+          </select>
+          <select>
+            <option>All Prices</option>
+            <option>Below KES 2M</option>
+            <option>KES 2M - 5M</option>
+            <option>Above KES 5M</option>
+          </select>
+          <button>Search</button>
         </div>
-      </section>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* CATEGORY SECTION */}
       <section className="categories">

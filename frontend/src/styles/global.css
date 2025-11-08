@@ -1,0 +1,36 @@
+/* === RESET GLOBAL LAYOUT === */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden; /* prevent horizontal scrollbars */
+  background: #fff;
+}
+
+/* Ensure main content spans full screen width */
+main {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+
+/* Prevent unwanted centering from frameworks or defaults */
+* {
+  box-sizing: border-box;
+  max-width: none !important;
+}
+
+/* Each section should take full width by default */
+section {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Optional smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
