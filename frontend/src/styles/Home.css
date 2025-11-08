@@ -1,0 +1,239 @@
+/* === GLOBAL === */
+.section-title {
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #111;
+}
+
+/* === HERO === */
+.hero {
+  position: relative;
+  background: url("/images/hero-car.png") center/cover no-repeat;
+  height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-overlay {
+  background: rgba(0, 0, 0, 0.55);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  text-align: center;
+  padding: 0 1.5rem;
+}
+.hero-text {
+  max-width: 650px;
+}
+.hero-text h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+.hero-text p {
+  font-size: 1.1rem;
+  color: #eee;
+}
+
+/* Search Bar */
+.hero-search {
+  background: #fff;
+  margin-top: 2rem;
+  padding: 1rem;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  width: 90%;
+  max-width: 900px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+.search-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  width: 100%;
+}
+.search-fields input,
+.search-fields select {
+  flex: 1;
+  padding: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.search-fields button {
+  background: #007bff;
+  color: #fff;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 5px;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+.search-fields button:hover {
+  background: #0056b3;
+}
+
+/* === CATEGORIES === */
+.categories {
+  padding: 4rem 5%;
+}
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+.category-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+}
+.category-card img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.category-card:hover img {
+  transform: scale(1.05);
+}
+.category-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 1.5rem;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+  color: #fff;
+}
+.category-overlay h3 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+.category-overlay .arrow {
+  color: #fff;
+  font-size: 1.25rem;
+}
+
+/* === TRENDING VEHICLES === */
+.trending {
+  padding: 4rem 5%;
+  background: #f8f9fa;
+}
+.trend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+.trend-header .view-all {
+  color: #007bff;
+  text-decoration: none;
+}
+.trend-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+.trend-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s ease;
+}
+.trend-card:hover {
+  transform: translateY(-5px);
+}
+.trend-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+.trend-info {
+  padding: 1.5rem;
+  text-align: center;
+}
+.trend-info h3 {
+  margin-bottom: 0.5rem;
+}
+.book-btn {
+  background: #007bff;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* === PROMO SECTION === */
+.promo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #111;
+  color: #fff;
+  padding: 4rem 5%;
+  flex-wrap: wrap;
+}
+.promo-content {
+  flex: 1;
+  max-width: 500px;
+}
+.promo-content h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+.promo-content p {
+  color: #ddd;
+  margin-bottom: 1.5rem;
+}
+.promo-btn {
+  background: #007bff;
+  color: #fff;
+  text-decoration: none;
+  padding: 0.8rem 1.6rem;
+  border-radius: 5px;
+}
+.promo-image img {
+  width: 450px;
+  max-width: 100%;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 1024px) {
+  .hero-text h1 {
+    font-size: 2.2rem;
+  }
+  .promo {
+    flex-direction: column;
+    text-align: center;
+  }
+  .promo-content {
+    margin-bottom: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    height: auto;
+    padding: 6rem 0;
+  }
+  .hero-search {
+    flex-direction: column;
+  }
+  .category-grid,
+  .trend-grid {
+    grid-template-columns: 1fr;
+  }
+  .category-card img {
+    height: 200px;
+  }
+}
