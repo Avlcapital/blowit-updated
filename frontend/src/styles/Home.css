@@ -11,10 +11,11 @@
 .hero {
   position: relative;
   background: url("/images/hero-car.png") center/cover no-repeat;
-  height: 90vh;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-top: 8rem; /* ensures text doesn’t hide under navbar */
 }
 .hero-overlay {
   background: rgba(0, 0, 0, 0.55);

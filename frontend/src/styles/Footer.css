@@ -1,0 +1,92 @@
+.footer {
+  background: #007bff;
+  color: #ccc;
+  padding: 4rem 6%;
+  font-family: "Poppins", sans-serif;
+}
+
+/* --- Columns Layout --- */
+.footer-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.footer-columns h4 {
+  color: #fff;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.footer-columns p {
+  line-height: 1.6;
+  color: #aaa;
+  font-size: 0.95rem;
+}
+
+/* --- Quick Links --- */
+.footer-columns ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-columns ul li {
+  margin-bottom: 0.6rem;
+}
+
+.footer-columns ul li a {
+  color: #ccc;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-columns ul li a:hover {
+  color: #007bff;
+}
+
+/* --- Footer Copy --- */
+.footer-copy {
+  text-align: center;
+  border-top: 1px solid #222;
+  padding-top: 1.5rem;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+/* --- Responsiveness --- */
+@media (max-width: 768px) {
+  .footer {
+    padding: 3rem 8%;
+    text-align: center;
+  }
+
+  .footer-columns {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .footer-columns h4 {
+    font-size: 1.1rem;
+  }
+
+  .footer-columns p {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer {
+    padding: 2.5rem 6%;
+  }
+
+  .footer-columns h4 {
+    margin-bottom: 0.7rem;
+  }
+
+  .footer-columns ul li {
+    margin-bottom: 0.4rem;
+  }
+}

@@ -1,71 +1,148 @@
-.navbar {
+/* === Navbar Wrapper (overlay style) === */
+.navbar-wrapper {
+  width: 90%;
+  padding-top: 2rem;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 5%;
-  background-color: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  position: sticky;
+  justify-content: center;
+  position: fixed;
   top: 0;
-  z-index: 999;
+  z-index: 1000;
+  transition: all 0.4s ease;
 }
 
+/* === Transparent Navbar at top === */
+.navbar {
+  width: 90%;
+  max-width: 1200px;
+  border-radius: 40px;
+  padding: 0.75rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+/* === Logo === */
 .navbar-logo a {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 700;
-  color: #007bff;
+  color: #fff;
   text-decoration: none;
+  letter-spacing: 1px;
 }
 
+/* === Links === */
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .nav-links a {
   text-decoration: none;
-  color: #222;
+  color: #fff;
   font-weight: 500;
+  position: relative;
+  transition: color 0.3s ease;
 }
 
-.nav-links a.btn-login {
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -5px;
+  left: 0;
+  background: #007bff;
+  transition: width 0.3s ease;
+}
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+/* Login Button */
+.nav-links .btn-login {
   background: #007bff;
   color: #fff;
-  padding: 0.5rem 1.25rem;
-  border-radius: 5px;
+  padding: 0.45rem 1.2rem;
+  border-radius: 20px;
+  font-weight: 600;
+}
+.nav-links .btn-login:hover {
+  background: #0056b3;
 }
 
+/* === Icons === */
+.nav-icons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.nav-search {
+  color: #fff;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
 .menu-toggle {
   display: none;
   font-size: 1.5rem;
+  color: #fff;
   cursor: pointer;
 }
 
-/* Responsive */
+/* === When Scrolled: Solid + Smaller === */
+.navbar-wrapper.scrolled .navbar {
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+}
+.navbar-wrapper.scrolled .nav-links a,
+.navbar-wrapper.scrolled .navbar-logo a,
+.navbar-wrapper.scrolled .nav-search {
+  color: #222;
+}
+
+/* === Responsive === */
 @media (max-width: 900px) {
   .menu-toggle {
     display: block;
   }
+
   .nav-links {
     position: absolute;
-    top: 70px;
-    right: 0;
-    background: #fff;
-    width: 70%;
+    top: 80px;
+    right: 5%;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
     padding: 1.5rem;
-    transform: translateX(100%);
+    gap: 1.2rem;
+    width: 80%;
+    max-width: 300px;
+    transform: translateY(-30px);
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
-    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
   }
+
   .nav-links.open {
-    transform: translateX(0);
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
   }
+
   .nav-links a {
+    color: #222 !important;
     width: 100%;
-    padding: 0.5rem 0;
+  }
+
+  .nav-links .btn-login {
+    width: 100%;
+    text-align: center;
   }
 }
