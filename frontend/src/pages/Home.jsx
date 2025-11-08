@@ -12,7 +12,7 @@ const Home = () => {
   <div className="hero-overlay">
     <div className="hero-inner">
       <div className="hero-text">
-        <h1>Buy Premium Cars from Japan</h1>
+        <h1>Get Your Dream Car With Us.</h1>
         <p>
           Purchase your next car through Blowit — the exclusive Be Forward
           agent in Kenya. Pay <strong>50% deposit</strong>, and AVLC finances
