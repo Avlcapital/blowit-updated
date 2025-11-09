@@ -23,7 +23,7 @@ const HowItWorks = () => {
           {/* STEP 1 */}
           <div className="how-step">
             <div className="how-text">
-              <h3>1️⃣ Choose Your Car</h3>
+              <h3>1️. Choose Your Car</h3>
               <p>
                 Browse our wide range of cars listed directly from{" "}
                 <strong>Be Forward Japan</strong>. Once you find a car that matches your preference — whether it’s a
@@ -44,7 +44,7 @@ const HowItWorks = () => {
               <img src="/src/assets/how-finance.jpg" alt="AVLC Financing" />
             </div>
             <div className="how-text">
-              <h3>2️⃣ Secure Financing</h3>
+              <h3>2️. Secure Financing</h3>
               <p>
                 Once you pay <strong>50% deposit</strong>, AVLC Group steps in to finance the other 50%.
                 We purchase the car on your behalf from Japan, ensuring authenticity and proper documentation.
@@ -58,7 +58,7 @@ const HowItWorks = () => {
           {/* STEP 3 */}
           <div className="how-step">
             <div className="how-text">
-              <h3>3️⃣ Import & Delivery</h3>
+              <h3>3️. Import & Delivery</h3>
               <p>
                 From Japan’s ports — <strong>Yokohama, Nagoya, or Kobe</strong> — your car is shipped to the Port of
                 Mombasa. We handle all customs clearance, taxes, and logbook registration.
