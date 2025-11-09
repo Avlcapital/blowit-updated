@@ -95,7 +95,7 @@ const Home = () => {
 
     <div className="why-grid">
       <div className="why-card">
-        <img src="/images/authentic.png" alt="Authenticity Guaranteed" />
+        <img src="/src/assets/authentic.jpg" alt="Authenticity Guaranteed" />
         <h3>Authenticity Guaranteed</h3>
         <p>
           We source directly from Japan’s No.1 trusted automobile export company — <strong>Be Forward</strong>.
@@ -104,7 +104,7 @@ const Home = () => {
       </div>
 
       <div className="why-card">
-        <img src="/images/fast.png" alt="Fast Turnaround" />
+        <img src="/src/assets/fast.webp" alt="Fast Turnaround" />
         <h3>Fast Turnaround</h3>
         <p>
           Enjoy quick delivery from <strong>Yokohama</strong>, <strong>Nagoya</strong>, or <strong>Kobe</strong> ports
@@ -113,7 +113,7 @@ const Home = () => {
       </div>
 
       <div className="why-card">
-        <img src="/images/support.png" alt="End-to-End Support" />
+        <img src="/src/assets/support.webp" alt="End-to-End Support" />
         <h3>End-to-End Support</h3>
         <p>
           From car selection to clearance and financing, we handle every step with AVLC’s trusted 50% financing option
