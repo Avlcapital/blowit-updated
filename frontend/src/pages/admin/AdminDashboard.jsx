@@ -1,14 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import AdminSidebar from "../../components/Admin/AdminSidebar";
 import AdminNavbar from "../../components/Admin/AdminNavbar";
 import "../../styles/admin/AdminDashboard.css";
 
 const AdminDashboard = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
   return (
     <div className="admin-layout">
-      <AdminSidebar />
+      <AdminSidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       <div className="admin-main">
-        <AdminNavbar />
+        <AdminNavbar toggleSidebar={toggleSidebar} />
         <div className="admin-content">
           <h1>Welcome, Admin 👋</h1>
           <p className="subtitle">Here’s a quick overview of Blowit operations.</p>
