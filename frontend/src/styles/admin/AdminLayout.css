@@ -168,6 +168,142 @@
   color: #003366;
 }
 
+/* ===== Profile Modal ===== */
+.profile-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.profile-modal {
+  background: #fff;
+  width: 90%;
+  max-width: 420px;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  animation: fadeInModal 0.3s ease;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.modal-header h3 {
+  color: #003366;
+  margin: 0;
+}
+
+.close-modal {
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: #333;
+}
+
+.modal-body p {
+  font-size: 0.95rem;
+  color: #333;
+  margin: 0.5rem 0;
+}
+
+.modal-footer {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.edit-btn,
+.password-btn {
+  flex: 1;
+  background: #003366;
+  color: #fff;
+  padding: 0.6rem 0.8rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.password-btn {
+  background: #6b7280;
+}
+
+.edit-btn:hover {
+  background: #00254d;
+}
+
+.password-btn:hover {
+  background: #555;
+}
+
+/* ===== Form Inputs inside Modals ===== */
+.modal-body label {
+  display: block;
+  margin-top: 0.8rem;
+  font-weight: 500;
+  color: #003366;
+}
+
+.modal-body input {
+  width: 100%;
+  padding: 0.6rem;
+  margin-top: 0.3rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+}
+
+.modal-body input:focus {
+  border-color: #003366;
+  outline: none;
+}
+
+/* Footer buttons alignment for single actions */
+.modal-footer button {
+  flex: 1;
+}
+
+/* Smaller animation tweak for nested modals */
+.profile-modal {
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* Animation */
+@keyframes fadeInModal {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 900px) {
   .hamburger {
     display: block;
