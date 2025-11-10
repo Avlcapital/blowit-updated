@@ -15,12 +15,10 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // handle input change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // handle registration
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Submitting form data:", formData);
@@ -60,7 +58,6 @@ const Register = () => {
             onChange={handleChange}
             required
           />
-
           <input
             type="email"
             name="email"
@@ -69,7 +66,6 @@ const Register = () => {
             onChange={handleChange}
             required
           />
-
           <input
             type="tel"
             name="phone"
@@ -78,7 +74,6 @@ const Register = () => {
             onChange={handleChange}
             required
           />
-
           <input
             type="password"
             name="password"
@@ -87,7 +82,6 @@ const Register = () => {
             onChange={handleChange}
             required
           />
-
           <input
             type="password"
             name="confirmPassword"
@@ -108,6 +102,14 @@ const Register = () => {
             Login
           </Link>
         </p>
+
+        {/* Back to Home button */}
+        <button
+          className="back-home-btn"
+          onClick={() => navigate("/")}
+        >
+          ← Back to Home
+        </button>
       </div>
     </div>
   );

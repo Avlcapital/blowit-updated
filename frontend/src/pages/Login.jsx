@@ -63,6 +63,14 @@ const Login = () => {
             Forgot Password?
           </Link>
         </p>
+
+        {/* Back to Home button */}
+        <button
+          className="back-home-btn"
+          onClick={() => navigate("/")}
+        >
+          ← Back to Home
+        </button>
       </div>
     </div>
   );

@@ -1,23 +1,31 @@
+/* Background gradient: Navy -> Warm Gray */
 .auth-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #007bff 0%, #004aad 100%);
+  background: linear-gradient(135deg, #003366 0%, #6B7280 100%);
 }
 
+/* Card styling */
 .auth-box {
-  background: #fff;
+  background: #ffffff;
   padding: 2.5rem;
-  border-radius: 12px;
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
-  width: 350px;
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  width: 380px;
   text-align: center;
+  transition: transform 0.3s ease;
+}
+.auth-box:hover {
+  transform: translateY(-4px);
 }
 
 .auth-box h2 {
   margin-bottom: 1.5rem;
-  color: #111;
+  color: #003366;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .auth-box form {
@@ -31,35 +39,71 @@
   border-radius: 8px;
   border: 1px solid #ccc;
   font-size: 1rem;
+  color: #1f2933;
+  transition: all 0.2s ease;
 }
 
 .auth-box input:focus {
-  border-color: #007bff;
+  border-color: #003366;
+  box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.2);
 }
 
 .auth-box button {
-  background: #007bff;
+  background: #003366;
   color: #fff;
   padding: 0.9rem;
   border-radius: 8px;
   border: none;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background 0.3s ease, transform 0.2s ease;
 }
 
 .auth-box button:hover {
-  background: #0056b3;
+  background: #00254d;
+  transform: scale(1.02);
 }
 
+/* Link and text styling */
 .auth-box p {
   margin-top: 1rem;
   color: #333;
+  font-size: 0.95rem;
 }
 
-.forgot-link {
-  color: #007bff;
+.link {
+  color: #D62828;
   text-decoration: none;
+  font-weight: 500;
 }
-.forgot-link:hover {
+.link:hover {
   text-decoration: underline;
+}
+
+/* Back to home button */
+.back-home-btn {
+  background: transparent;
+  border: 2px solid #003366;
+  color: #003366;
+  padding: 0.6rem 1.2rem;
+  margin-top: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+.back-home-btn:hover {
+  background: #D62828;
+  color: #fff;
+  border-color: #D62828;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .auth-box {
+    width: 90%;
+    padding: 2rem 1.5rem;
+  }
+  .auth-box h2 {
+    font-size: 1.5rem;
+  }
 }
