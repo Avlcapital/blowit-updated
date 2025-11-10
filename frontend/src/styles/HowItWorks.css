@@ -1,14 +1,13 @@
-/* === HERO SECTION === */
+/* === HERO === */
 .how-hero {
   position: relative;
-  height: 80vh;
-  background: url("/src/assets/how-hero.jpg") center/cover no-repeat;
+  height: 70vh;
+  background: url("../assets/how-hero.jpg") center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
 }
-
 .how-overlay {
   position: absolute;
   inset: 0;
@@ -19,31 +18,27 @@
   text-align: center;
   padding: 0 1rem;
 }
-
 .how-hero-text h1 {
   font-size: 2.8rem;
   margin-bottom: 1rem;
   font-weight: 700;
 }
-
 .how-hero-text p {
   font-size: 1.1rem;
   max-width: 650px;
   margin: 0 auto;
 }
 
-/* === MAIN CONTENT === */
+/* === CONTENT === */
 .how-content {
   width: 100%;
   padding: 5rem 5%;
   background: #fff;
 }
-
 .how-container {
   max-width: 1200px;
   margin: 0 auto;
 }
-
 .how-container h2 {
   text-align: center;
   font-size: 2rem;
@@ -55,42 +50,38 @@
 .how-step {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 3rem;
   margin-bottom: 5rem;
 }
-
-.how-step.reverse {
-  flex-direction: row-reverse;
+.how-step:nth-child(even) {
+  flex-direction: row-reverse; /* auto-alternate */
 }
-
 .how-text {
   flex: 1;
 }
-
 .how-text h3 {
   color: #007bff;
   font-size: 1.4rem;
   margin-bottom: 1rem;
 }
-
 .how-text p {
   color: #555;
   line-height: 1.6;
   margin-bottom: 0.8rem;
   font-size: 1rem;
 }
-
 .how-image {
   flex: 1;
   display: flex;
   justify-content: center;
 }
-
 .how-image img {
   width: 100%;
   max-width: 500px;
   border-radius: 15px;
   box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+  object-fit: cover;
 }
 
 /* === SUMMARY === */
@@ -98,19 +89,16 @@
   text-align: center;
   margin-top: 4rem;
 }
-
 .how-summary h2 {
   font-size: 2rem;
   color: #111;
 }
-
 .how-summary p {
   color: #555;
   font-size: 1.05rem;
   margin: 1rem auto 2rem;
   max-width: 700px;
 }
-
 .how-summary img {
   width: 100%;
   max-width: 600px;
@@ -118,33 +106,20 @@
   box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
 }
 
-/* === RESPONSIVE DESIGN === */
-@media (max-width: 1024px) {
-  .how-step {
-    gap: 2rem;
-  }
-
-  .how-hero-text h1 {
-    font-size: 2.2rem;
-  }
-}
-
+/* === RESPONSIVE === */
 @media (max-width: 768px) {
   .how-hero {
     height: 60vh;
   }
-
   .how-step,
-  .how-step.reverse {
+  .how-step:nth-child(even) {
     flex-direction: column;
     text-align: center;
   }
-
-  .how-text h3 {
-    font-size: 1.2rem;
-  }
-
   .how-image img {
     max-width: 90%;
+  }
+  .how-text h3 {
+    font-size: 1.2rem;
   }
 }

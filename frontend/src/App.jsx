@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 import { Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
 import HowItWorks from './pages/HowItWorks'
+import Contact from './pages/Contact'
 
 function App() {
   
@@ -14,6 +13,7 @@ function App() {
       <Routes>
         <Route path='/' element={<Home/>}/>
         <Route path='/how-it-works' element={<HowItWorks/>}/>
+        <Route path='/contact' element={<Contact/>}/>
       </Routes>
     </>
   )
