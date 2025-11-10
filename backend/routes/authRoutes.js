@@ -2,18 +2,23 @@ import express from "express";
 import {
   registerUser,
   loginUser,
-  forgotPassword,
-  verifyOTP,
-  resetPassword,
-  verifyLoginOTP,
+  
 } from "../controllers/authController.js";
+import { adminOnly, protect } from "../middleware/authMiddleware.js";
+
 const router = express.Router();
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
-router.post("/forgot-password", forgotPassword);
-router.post("/verify-otp", verifyOTP);
-router.post("/login/verify-otp", verifyLoginOTP);
-router.post("/reset-password", resetPassword);
+
+// Example protected routes
+router.get("/profile", protect, (req, res) => {
+  res.json({ message: `Welcome ${req.user.name}`, user: req.user });
+});
+
+router.get("/admin/dashboard", protect, adminOnly, (req, res) => {
+  res.json({ message: "Admin access granted" });
+});
+
 
 export default router;
