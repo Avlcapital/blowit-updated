@@ -8,20 +8,24 @@ import {
   FaTimes,
   FaSave,
 } from "react-icons/fa";
+import axios from "axios";
 import "../../styles/admin/AdminLayout.css";
+import { BASE_URL } from "../../utils/config";
+import api from "../../utils/api";
 
 const AdminNavbar = ({ toggleSidebar }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [loading, setLoading] = useState(false);
   const dropdownRef = useRef(null);
 
-  // temporary local state for demo
+  // state for admin data
   const [adminData, setAdminData] = useState({
-    name: "Admin User",
-    email: "admin@blowit.africa",
-    role: "Administrator",
+    name: "",
+    email: "",
+    role: "",
   });
   const [newData, setNewData] = useState(adminData);
   const [passwords, setPasswords] = useState({ old: "", new: "", confirm: "" });
@@ -38,6 +42,25 @@ const AdminNavbar = ({ toggleSidebar }) => {
     window.location.href = "/login";
   };
 
+  // Fetch profile info on mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get(`${BASE_URL}/api/auth/profile`);
+        if (res.data.user) {
+          setAdminData(res.data.user);
+          setNewData(res.data.user);
+        }
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -49,27 +72,59 @@ const AdminNavbar = ({ toggleSidebar }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // handle updates
-  const handleEditSave = () => {
-    setAdminData(newData);
-    setShowEditModal(false);
+  // --- SAVE PROFILE UPDATES ---
+  const handleEditSave = async () => {
+    try {
+      setLoading(true);
+      const res = await api.put(`${BASE_URL}/api/auth/update-profile`, {
+        name: newData.name,
+        email: newData.email,
+      });
+
+      if (res.data.success) {
+        setAdminData(res.data.user);
+        alert("Profile updated successfully!");
+        setShowEditModal(false);
+      } else {
+        alert(res.data.message || "Failed to update profile");
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || "Error updating profile");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handlePasswordSave = () => {
+  // --- CHANGE PASSWORD ---
+  const handlePasswordSave = async () => {
     if (passwords.new !== passwords.confirm) {
-      alert("Passwords do not match");
-      return;
+      return alert("Passwords do not match");
     }
-    alert("Password updated successfully!");
-    setPasswords({ old: "", new: "", confirm: "" });
-    setShowPasswordModal(false);
+    try {
+      setLoading(true);
+      const res = await api.put(`${BASE_URL}/api/auth/change-password`, {
+        oldPassword: passwords.old,
+        newPassword: passwords.new,
+      });
+
+      if (res.data.success) {
+        alert(" Password updated successfully!");
+        setPasswords({ old: "", new: "", confirm: "" });
+        setShowPasswordModal(false);
+      } else {
+        alert(res.data.message || "Failed to change password");
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || "Error changing password");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <>
       <header className="admin-navbar">
         <FaBars className="hamburger" onClick={toggleSidebar} />
-
         <h2>Blowit Admin Dashboard</h2>
 
         <div className="admin-profile" ref={dropdownRef}>
@@ -100,17 +155,21 @@ const AdminNavbar = ({ toggleSidebar }) => {
               />
             </div>
 
-            <div className="modal-body">
-              <p>
-                <strong>Name:</strong> {adminData.name}
-              </p>
-              <p>
-                <strong>Email:</strong> {adminData.email}
-              </p>
-              <p>
-                <strong>Role:</strong> {adminData.role}
-              </p>
-            </div>
+            {loading ? (
+              <p>Loading profile...</p>
+            ) : (
+              <div className="modal-body">
+                <p>
+                  <strong>Name:</strong> {adminData.name}
+                </p>
+                <p>
+                  <strong>Email:</strong> {adminData.email}
+                </p>
+                <p>
+                  <strong>Role:</strong> {adminData.role}
+                </p>
+              </div>
+            )}
 
             <div className="modal-footer">
               <button
@@ -167,7 +226,7 @@ const AdminNavbar = ({ toggleSidebar }) => {
             </div>
             <div className="modal-footer">
               <button className="edit-btn" onClick={handleEditSave}>
-                <FaSave /> Save Changes
+                <FaSave /> {loading ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </div>
@@ -213,7 +272,7 @@ const AdminNavbar = ({ toggleSidebar }) => {
             </div>
             <div className="modal-footer">
               <button className="password-btn" onClick={handlePasswordSave}>
-                <FaSave /> Update Password
+                <FaSave /> {loading ? "Updating..." : "Update Password"}
               </button>
             </div>
           </div>
