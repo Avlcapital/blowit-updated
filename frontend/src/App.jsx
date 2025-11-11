@@ -9,6 +9,7 @@ import Login from './pages/Login'
 import ForgotPassword from './pages/ForgotPassword'
 import AdminRoute from './components/Routes/AdminRoute'
 import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminVehicles from './pages/admin/AdminVehicles'
 
 function App() {
   
@@ -28,6 +29,16 @@ function App() {
           element={
             <AdminRoute>
               <AdminDashboard/>
+            </AdminRoute>
+          }
+        />
+
+        {/* 👇 Add this for vehicles management */}
+        <Route
+          path="/admin/vehicles"
+          element={
+            <AdminRoute>
+              <AdminVehicles />
             </AdminRoute>
           }
         />
