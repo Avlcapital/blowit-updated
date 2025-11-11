@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FaTimes, FaUpload, FaSave } from "react-icons/fa";
 import api from "../../utils/api";
 import { BASE_URL } from "../../utils/config";
+import "../../styles/admin/EditVehicleModal.css";
 
 const EditVehicleModal = ({ vehicle, onClose, onSuccess }) => {
   // existing state...
@@ -51,6 +52,12 @@ const EditVehicleModal = ({ vehicle, onClose, onSuccess }) => {
   return (
     <div className="modal-overlay">
       <div className="modal">
+
+        {/* 🔹 Modal Header with Close Icon */}
+    <div className="modal-header">
+      <h3>Edit Vehicle</h3>
+      <FaTimes className="close" onClick={onClose} />
+    </div>
         {/* header ... */}
         <form onSubmit={handleSubmit} className="modal-body">
           {/* fields ... unchanged */}

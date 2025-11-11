@@ -59,7 +59,7 @@
   flex-direction: column;
   gap: 0.65rem;
   padding: 1.2rem;
-  max-height: 75vh; /* 👈 keeps modal from exceeding viewport height */
+  max-height: 75vh; /* keeps modal from exceeding viewport height */
   overflow-y: auto;
 }
 
