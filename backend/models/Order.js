@@ -2,69 +2,55 @@ import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema(
   {
-    customerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    vehicleRef: { type: mongoose.Schema.Types.ObjectId, ref: "Vehicle" },
-    pricing: {
-      fob: Number,
-      cif: Number,
-      duties: Number,
-      fees: Number,
-      serviceFee: Number,
-      totalEstimate: { type: Number, required: true },
-      currency: { type: String, default: "KES" },
+    vehicle: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Vehicle",
+      required: true,
     },
-    payments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Payment" }],
+    customer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    //Payment details
+    totalPrice: { type: Number, required: true },
+    depositAmount: { type: Number, default: 0 },
+    balanceAmount: { type: Number, default: 0 },
+    depositPaid: { type: Boolean, default: false },
+    financedByAvlc: { type: Boolean, default: false },
+    finalPaymentDone: { type: Boolean, default: false },
+
+    //Status flow
     status: {
       type: String,
-      default: "DEPOSIT_PENDING",
       enum: [
-        "DRAFT",
-        "DEPOSIT_PENDING",
-        "DEPOSIT_PAID",
-        "FINANCE_REVIEW",
-        "FINANCE_APPROVED",
-        "SUPPLIER_PAID",
-        "IN_TRANSIT",
-        "AT_PORT",
-        "CLEARANCE",
-        "WAREHOUSE",
-        "READY_FOR_PICKUP",
-        "BALANCE_PENDING",
-        "BALANCE_PAID",
-        "RELEASED",
-        "COMPLETED",
-        "CANCELLED",
-        "REFUNDED",
+        "Pending",
+        "Processing",
+        "Financed",
+        "Shipped",
+        "Arrived",
+        "Completed",
+        "Cancelled",
       ],
+      default: "Pending",
     },
-    logistics: {
-      supplier: String,
-      vessel: String,
-      eta: Date,
-      container: String,
-      blNo: String,
+
+    //Stage timestamps
+    stageTimestamps: {
+      depositPaidAt: Date,
+      financedAt: Date,
+      shippedAt: Date,
+      arrivedAt: Date,
+      completedAt: Date,
     },
-    warehouse: {
-      name: String,
-      slot: String,
-      fees: Number,
-      readyDate: Date,
-    },
-    documents: [
+
+    //Supporting info
+    notes: String,
+    shippingDocs: [
       {
-        type: { type: String },
         url: String,
-        uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        verified: Boolean,
-      },
-    ],
-    history: [
-      {
-        from: String,
-        to: String,
-        at: { type: Date, default: Date.now },
-        by: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        notes: String,
+        public_id: String,
       },
     ],
   },
