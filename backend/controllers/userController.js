@@ -60,6 +60,8 @@ export const getAllUsersPaginated = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const total = await User.countDocuments();
+
+    const sort = req.query.sort === "oldest" ? 1 : -1; // newest default
     const users = await User.find()
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -68,6 +70,7 @@ export const getAllUsersPaginated = async (req, res) => {
     res.json({
       success: true,
       users,
+      sort,
       page,
       pages: Math.ceil(total / limit),
       total

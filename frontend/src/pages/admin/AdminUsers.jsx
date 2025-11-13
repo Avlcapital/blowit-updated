@@ -6,6 +6,7 @@ import { BASE_URL } from "../../utils/config";
 import "../../styles/admin/AdminUsers.css";
 import { FaEdit, FaTrash, FaUser } from "react-icons/fa";
 import EditUserModal from "../../components/Admin/EditUserModal";
+import ViewUserPanel from "../../components/Admin/ViewUserPanel";
 
 const AdminUsers = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -15,13 +16,15 @@ const AdminUsers = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
+  const [showView, setShowView] = useState(false);
+  const [sort, setSort] = useState("newest");
 
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  const fetchUsers = async (p = page) => {
+  const fetchUsers = async (p = page, s = sort) => {
     try {
-      const res = await api.get(`${BASE_URL}/api/users?page=${p}`);
+      const res = await api.get(`${BASE_URL}/api/users?page=${p}&sort=${s}`);
       if (res.data.success) 
         setUsers(res.data.users);
         setPage(res.data.page);
@@ -59,6 +62,16 @@ const AdminUsers = () => {
             <p>Loading...</p>
           ) : (
             <div className="table-wrap">
+               <div className="sort-bar">
+                <label>Sort: </label>
+                <select value={sort} onChange={(e) => {
+                  setSort(e.target.value);
+                  fetchUsers(1, e.target.value);
+                }}>
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                </select>
+            </div> 
               <table className="users-table">
                 <thead>
                   <tr>
@@ -79,6 +92,7 @@ const AdminUsers = () => {
                       <td>{u.role}</td>
                       <td>{new Date(u.createdAt).toLocaleDateString()}</td>
                       <td>
+                        <button className="view-btn" onClick={() => { setSelectedUser(u); setShowView(true); }}><FaUser /></button>
                         <button className="edit-btn" onClick={() =>{setSelectedUser(u); setShowEdit(true) }}><FaEdit /></button>
                         <button className="delete-btn" onClick={() => deleteUser(u._id)}><FaTrash /></button>
                       </td>
@@ -96,23 +110,30 @@ const AdminUsers = () => {
                 />
               )}
 
+              {showView && selectedUser && (
+               <ViewUserPanel
+                 user={selectedUser}
+                 onClose={() => setShowView(false)}
+               />
+              )}
+
               <div className="pager">
-  <button 
-    disabled={page <= 1} 
-    onClick={() => fetchUsers(page - 1)}
-  >
-    Prev
-  </button>
+               <button 
+                 disabled={page <= 1} 
+                 onClick={() => fetchUsers(page - 1)}
+                >
+                Prev
+               </button>
 
-  <span>{page} / {pages}</span>
+              <span>{page} / {pages}</span>
 
-  <button 
-    disabled={page >= pages} 
-    onClick={() => fetchUsers(page + 1)}
-  >
-    Next
-  </button>
-</div>
+              <button 
+               disabled={page >= pages} 
+               onClick={() => fetchUsers(page + 1)}
+              >
+              Next
+              </button>
+              </div>
             </div>
           )}
         </div>
