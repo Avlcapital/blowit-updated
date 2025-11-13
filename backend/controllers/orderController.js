@@ -4,6 +4,8 @@ import cloudinary from "../config/cloudinary.js";
 import { sendMail } from "../utils/email.js";
 import { orderEmails } from "../utils/templates/orderEmails.js";
 
+import { getIO } from "../socket.js";
+
 /* CREATE ORDER */
 export const createOrder = async (req, res) => {
   try {
@@ -31,6 +33,10 @@ export const createOrder = async (req, res) => {
       depositAmount: depositAmount || Math.round(totalPrice * 0.5),
     });
     sendMail({ to: req.user.email, subject, html });
+
+    await order.save();
+
+    getIO().emit("order:created", { order });
 
     res.status(201).json({ success: true, order });
   } catch (err) {
@@ -142,6 +148,8 @@ export const updateOrderStatus = async (req, res) => {
 
     await order.save();
 
+    getIO().emit("order:updated", { orderId: order._id, order });
+
     res.json({ success: true, message: "Order updated", order, before });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -156,6 +164,9 @@ export const deleteOrder = async (req, res) => {
     if (!order) return res.status(404).json({ message: "Order not found" });
 
     await order.deleteOne();
+
+    getIO().emit("order:deleted", { orderId: id });
+    
     res.json({ success: true, message: "Order deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -171,7 +182,7 @@ export const uploadOrderDocs = async (req, res) => {
 
     const uploaded = [];
     for (const f of req.files) {
-      const r = await cloudinary.uploader.upload(f.path, { folder: "blowit/orders/docs" });
+      const r = await cloudinary.uploader.upload(f.path, { folder: "blowit/orders/docs", resource_type:"auto" });
       uploaded.push({ url: r.secure_url, public_id: r.public_id });
     }
 
@@ -187,6 +198,10 @@ export const uploadOrderDocs = async (req, res) => {
       orderId: order._id.toString(),
     });
     sendMail({ to: order.customer?.email, subject, html });
+
+
+    getIO().emit("order:docs", { orderId: order._id, order });
+
 
     res.json({ success: true, message: "Documents uploaded", order });
   } catch (err) {

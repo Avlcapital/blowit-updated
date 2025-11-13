@@ -10,6 +10,8 @@ import ForgotPassword from './pages/ForgotPassword'
 import AdminRoute from './components/Routes/AdminRoute'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminVehicles from './pages/admin/AdminVehicles'
+import AdminOrders from './pages/admin/AdminOrders'
+import AdminUsers from './pages/admin/AdminUsers'
 
 function App() {
   
@@ -42,6 +44,26 @@ function App() {
             </AdminRoute>
           }
         />
+
+        <Route
+          path="/admin/orders"
+          element={
+            <AdminRoute>
+              <AdminOrders />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/users"
+          element={
+           <AdminRoute>
+             <AdminUsers />
+           </AdminRoute>
+          }
+        />
+
+
       </Routes>
     </>
   )
