@@ -48,6 +48,35 @@
   background: #d62828;
 }
 
+.pager {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+.pager button {
+  padding: 0.45rem 0.9rem;
+  background: #003366;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.pager button:disabled {
+  background: #b3b3b3;
+  cursor: not-allowed;
+}
+
+.pager span {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+
 @media (max-width: 768px) {
   .users-table {
     min-width: 650px;

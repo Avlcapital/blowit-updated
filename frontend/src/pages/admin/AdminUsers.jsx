@@ -13,13 +13,19 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [showEdit, setShowEdit] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
+
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (p = page) => {
     try {
-      const res = await api.get(`${BASE_URL}/api/users`);
-      if (res.data.success) setUsers(res.data.users);
+      const res = await api.get(`${BASE_URL}/api/users?page=${p}`);
+      if (res.data.success) 
+        setUsers(res.data.users);
+        setPage(res.data.page);
+        setPages(res.data.pages);
     } catch {
       alert("Failed to load users");
     } finally {
@@ -89,6 +95,24 @@ const AdminUsers = () => {
                 
                 />
               )}
+
+              <div className="pager">
+  <button 
+    disabled={page <= 1} 
+    onClick={() => fetchUsers(page - 1)}
+  >
+    Prev
+  </button>
+
+  <span>{page} / {pages}</span>
+
+  <button 
+    disabled={page >= pages} 
+    onClick={() => fetchUsers(page + 1)}
+  >
+    Next
+  </button>
+</div>
             </div>
           )}
         </div>
