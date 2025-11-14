@@ -202,6 +202,11 @@ export const uploadOrderDocs = async (req, res) => {
 
     getIO().emit("order:docs", { orderId: order._id, order });
 
+    getIO().emit(`customer:${order.customer}`, {
+     type: "dashboard-update",
+    });
+
+
 
     res.json({ success: true, message: "Documents uploaded", order });
   } catch (err) {

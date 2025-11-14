@@ -1,0 +1,92 @@
+/* MAIN SIDEBAR (DESKTOP) */
+.customer-sidebar {
+  width: 240px;
+  background: #003366;
+  color: white;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;                     /* ALWAYS visible on desktop */
+  display: flex;
+  flex-direction: column;
+  padding-top: 1rem;
+  z-index: 1000;
+}
+
+/* Mobile sliding behaviour */
+.customer-sidebar.open-mobile {
+  left: 0;
+}
+
+.close-icon {
+  display: none;
+  color: #fff;
+  font-size: 1.5rem;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  cursor: pointer;
+}
+
+/* Header */
+.sidebar-header {
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.sidebar-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: white;
+}
+
+/* MENU */
+.sidebar-menu {
+  list-style: none;
+  padding: 1rem 0;
+  margin: 0;
+}
+
+.sidebar-menu li {
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-menu a,
+.sidebar-menu button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1.2rem;
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: background 0.2s ease-in-out;
+}
+
+.sidebar-menu a:hover,
+.sidebar-menu button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+.logout-btn {
+  color: #ffb6b6;
+}
+
+/* ===== MOBILE RESPONSIVENESS ===== */
+@media (max-width: 768px) {
+  .customer-sidebar {
+    left: -260px;              /* hidden on mobile by default */
+    transition: 0.3s ease;
+  }
+
+  .customer-sidebar.open-mobile {
+    left: 0;                    /* slide in */
+  }
+
+  .close-icon {
+    display: block;
+  }
+}

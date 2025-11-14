@@ -1,0 +1,20 @@
+.customer-layout {
+  display: flex;
+  width: 100%;
+}
+
+.customer-main {
+  margin-left: 240px;
+  width: calc(100% - 240px);
+  min-height: 100vh;
+  background: #f5f7fa;
+  transition: 0.3s ease;
+}
+
+/* Mobile FIX */
+@media (max-width: 768px) {
+  .customer-main {
+    margin-left: 0;
+    width: 100%;
+  }
+}

@@ -12,6 +12,7 @@ import orderRoutes from "./routes/orderRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import customerRoutes from "./routes/customerRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -29,6 +30,8 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/customer", customerRoutes);
+
 
 // Default
 app.get("/", (req, res) => res.send("Blowit API is running..."));

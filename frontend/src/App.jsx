@@ -12,6 +12,8 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminVehicles from './pages/admin/AdminVehicles'
 import AdminOrders from './pages/admin/AdminOrders'
 import AdminUsers from './pages/admin/AdminUsers'
+import CustomerRoute from './components/Routes/CustomerRoute'
+import CustomerDashboard from './pages/customer/CustomerDashboard'
 
 function App() {
   
@@ -35,7 +37,7 @@ function App() {
           }
         />
 
-        {/* 👇 Add this for vehicles management */}
+        {/*Add this for vehicles management */}
         <Route
           path="/admin/vehicles"
           element={
@@ -60,6 +62,15 @@ function App() {
            <AdminRoute>
              <AdminUsers />
            </AdminRoute>
+          }
+        />
+        
+        <Route
+          path="/customer/dashboard"
+          element={
+           <CustomerRoute>
+             <CustomerDashboard />
+           </CustomerRoute>
           }
         />
 

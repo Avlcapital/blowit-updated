@@ -1,0 +1,47 @@
+.customer-content {
+  padding: 20px;
+}
+
+.customer-content h1 {
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  color: #003366;
+}
+
+.stats-cards {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.stats-cards .card {
+  background: white;
+  padding: 1.3rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  width: 250px;
+}
+
+.stats-cards .card h3 {
+  margin: 0;
+  color: #0B3D91;
+  font-size: 1rem;
+}
+
+.stats-cards .card p {
+  font-size: 1.3rem;
+  margin-top: 8px;
+  font-weight: 600;
+  color: #003366;
+}
+
+/* ======= Mobile ======= */
+@media (max-width: 768px) {
+  .stats-cards {
+    flex-direction: column;
+  }
+
+  .stats-cards .card {
+    width: 100%;
+  }
+}
