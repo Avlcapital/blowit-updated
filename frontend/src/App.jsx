@@ -14,6 +14,7 @@ import AdminOrders from './pages/admin/AdminOrders'
 import AdminUsers from './pages/admin/AdminUsers'
 import CustomerRoute from './components/Routes/CustomerRoute'
 import CustomerDashboard from './pages/customer/CustomerDashboard'
+import CustomerVehicles from './pages/customer/CustomerVehicles'
 
 function App() {
   
@@ -70,6 +71,15 @@ function App() {
           element={
            <CustomerRoute>
              <CustomerDashboard />
+           </CustomerRoute>
+          }
+        />
+
+        <Route
+          path="/customer/vehicles"
+          element={
+           <CustomerRoute>
+             <CustomerVehicles />
            </CustomerRoute>
           }
         />

@@ -1,0 +1,206 @@
+/* =========================
+   Quick View Modal (Customer)
+   ========================= */
+
+.vq-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1300;
+  backdrop-filter: blur(3px);
+}
+
+.vq-modal {
+  background: #ffffff;
+  width: 95%;
+  max-width: 1000px;
+  max-height: 90vh;
+  border-radius: 16px;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.35);
+  padding: 1.2rem 1.4rem 1.4rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Close button */
+.vq-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: none;
+  background: #f3f4f6;
+  color: #111827;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+}
+
+/* Header */
+.vq-header {
+  padding-right: 3rem; /* space for close */
+  margin-bottom: 0.8rem;
+}
+
+.vq-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #003366;
+}
+
+.vq-header p {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+/* Tabs */
+.vq-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.4rem;
+}
+
+.vq-tabs button {
+  border: none;
+  background: transparent;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: #4b5563;
+}
+
+.vq-tabs button.active {
+  background: #003366;
+  color: #ffffff;
+}
+
+/* Body layout */
+.vq-body {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr);
+  gap: 1rem;
+  overflow: hidden;
+}
+
+/* Gallery / 360 / 3D sections */
+.vq-gallery img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.vq-360-wrap,
+.vq-3d-wrap {
+  width: 100%;
+  height: 320px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #111827;
+}
+
+/* Specs */
+.vq-specs {
+  margin-top: 0.9rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 0.8rem;
+}
+
+.vq-specs h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+  color: #111827;
+}
+
+.vq-specs ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.vq-specs li + li {
+  margin-top: 0.2rem;
+}
+
+/* Footer */
+.vq-footer {
+  margin-top: 0.9rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.vq-btn-primary {
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  border: none;
+  background: #0b3d91;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Slick overrides inside modal */
+.vq-gallery .slick-dots li button:before {
+  font-size: 8px;
+}
+
+/* =========================
+   Responsive
+   ========================= */
+
+@media (max-width: 900px) {
+  .vq-modal {
+    max-width: 95%;
+    padding: 1rem 1rem 1.2rem;
+  }
+
+  .vq-gallery img,
+  .vq-360-wrap,
+  .vq-3d-wrap {
+    height: 260px;
+  }
+}
+
+@media (max-width: 600px) {
+  .vq-modal {
+    max-height: 95vh;
+  }
+
+  .vq-header h2 {
+    font-size: 1.05rem;
+  }
+
+  .vq-header p {
+    font-size: 0.85rem;
+  }
+
+  .vq-tabs {
+    flex-wrap: wrap;
+  }
+
+  .vq-tabs button {
+    font-size: 0.8rem;
+  }
+
+  .vq-gallery img,
+  .vq-360-wrap,
+  .vq-3d-wrap {
+    height: 220px;
+  }
+}
