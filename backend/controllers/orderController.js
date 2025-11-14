@@ -9,19 +9,17 @@ import { getIO } from "../socket.js";
 /* CREATE ORDER */
 export const createOrder = async (req, res) => {
   try {
-    const { vehicleId, totalPrice, depositAmount } = req.body;
-
-    const vehicle = await Vehicle.findById(vehicleId);
-    if (!vehicle) return res.status(404).json({ message: "Vehicle not found" });
-
-    const balanceAmount = totalPrice - (depositAmount || 0);
+    const { vehicleId, fullName, phone, email, price, depositAmount } = req.body;
 
     const order = await Order.create({
-      vehicle: vehicleId,
       customer: req.user._id,
-      totalPrice,
+      vehicle: vehicleId,
+      fullName,
+      phone,
+      email,
+      totalPrice: price,
       depositAmount,
-      balanceAmount,
+      paymentStatus: "PENDING",
     });
 
     // notify customer (non-blocking)

@@ -1,0 +1,137 @@
+.ri-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 1100;
+}
+
+.ri-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 92%;
+  max-width: 450px;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 20px 35px rgba(0,0,0,0.35);
+  z-index: 1101;
+}
+
+.ri-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.6rem;
+}
+
+.ri-close {
+  cursor: pointer;
+  font-size: 1.3rem;
+  color: #374151;
+}
+
+.ri-body {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ri-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.ri-body input,
+.ri-body select,
+.ri-body textarea {
+  width: 100%;
+  padding: 0.55rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+}
+
+.ri-submit-btn {
+  width: 100%;
+  margin-top: 0.7rem;
+  padding: 0.7rem;
+  border: none;
+  border-radius: 999px;
+  background: #003366;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rim-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 1000;
+}
+
+.rim-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 95%;
+  max-width: 450px;
+  background: #fff;
+  padding: 1.2rem 1.4rem;
+  border-radius: 14px;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+  z-index: 1001;
+}
+
+.rim-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rim-close {
+  cursor: pointer;
+  font-size: 1.3rem;
+}
+
+.rim-vehicle {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.rim-price {
+  font-weight: bold;
+  color: #0b3d91;
+  margin-bottom: 1rem;
+}
+
+.rim-form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 0.4rem;
+  display: block;
+}
+
+.rim-form input {
+  width: 100%;
+  padding: 0.55rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 0.6rem;
+}
+
+.rim-submit-btn {
+  width: 100%;
+  padding: 0.7rem;
+  border-radius: 10px;
+  background: #0b3d91;
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
