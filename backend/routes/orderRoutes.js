@@ -14,7 +14,7 @@ const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
 // CUSTOMER
-router.post("/", protect, createOrder);
+router.post("/create", protect, createOrder);
 router.get("/my", protect, getMyOrders);
 
 // ADMIN / AVLC

@@ -1,138 +1,134 @@
-import React, { useState } from "react";
-import { FaTimes } from "react-icons/fa";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+import React, { useState, useEffect } from "react";
+import { FaTimes, FaCarSide, FaGasPump, FaStopwatch } from "react-icons/fa";
 import "../../styles/customer/VehicleQuickViewModal.css";
-import React360Viewer from "react-360-view";
-import "@google/model-viewer";
+
+import RequestImportModal from "./RequestImportModal";
 
 const VehicleQuickViewModal = ({ vehicle, onClose }) => {
-  const [tab, setTab] = useState(
-    vehicle.images?.length ? "images" :
-    vehicle.has360 ? "360" :
-    vehicle.model3dUrl ? "3d" : "images"
-  );
+  const [showRequest, setShowRequest] = useState(false);
 
-  const sliderSettings = {
-    dots: true,
-    infinite: true,
-    arrows: true,
-    speed: 400,
-  };
+  // Loan calculator state
+  const [depositPercent, setDepositPercent] = useState(30);
+  const [months, setMonths] = useState(12);
+  const [loanAmount, setLoanAmount] = useState(0);
+  const [monthlyPay, setMonthlyPay] = useState(0);
 
-  const hasImages = vehicle.images && vehicle.images.length > 0;
-  const has360 = vehicle.has360 && vehicle.spinImages?.length > 0;
-  const has3D = !!vehicle.model3dUrl;
+  // Duty calculator state
+  const [duty, setDuty] = useState(0);
+
+  /* ===== Loan & Duty Calculation ===== */
+  useEffect(() => {
+    if (!vehicle?.price) return;
+
+    const price = Number(vehicle.price);
+
+    // loan amount calculation
+    const deposit = (depositPercent / 100) * price;
+    const loan = price - deposit;
+    setLoanAmount(loan);
+
+    // monthly (simple interest)
+    const interestRate = 0.18; // 18% p.a
+    const monthlyInterest = (loan * interestRate) / 12;
+    const total = loan + monthlyInterest;
+    setMonthlyPay(Math.ceil(total / months));
+
+    // Duty Estimate (simple approximation)
+    const estimatedDuty = price * 0.45; // average 40–55% depending on KRA
+    setDuty(Math.round(estimatedDuty));
+  }, [depositPercent, months, vehicle]);
+
+  if (!vehicle) return null;
+
+  const mainImg = vehicle.images?.[0]?.url || "/placeholder-car.jpg";
 
   return (
-    <div className="vq-overlay">
+    <>
+      {/* Background overlay */}
+      <div className="vq-overlay" onClick={onClose}></div>
+
       <div className="vq-modal">
-        <button className="vq-close" onClick={onClose}>
-          <FaTimes />
-        </button>
-
+        {/* Header */}
         <div className="vq-header">
-          <h2>{vehicle.title || `${vehicle.brand} ${vehicle.model}`}</h2>
-          <p>
-            KES {Number(vehicle.price || 0).toLocaleString()} •{" "}
-            {vehicle.year} • {vehicle.fuelType} • {vehicle.transmission}
-          </p>
+          <h3>{vehicle.title || `${vehicle.brand} ${vehicle.model}`}</h3>
+          <FaTimes className="vq-close" onClick={onClose} />
         </div>
 
-        {/* Tabs */}
-        <div className="vq-tabs">
-          {hasImages && (
-            <button
-              className={tab === "images" ? "active" : ""}
-              onClick={() => setTab("images")}
-            >
-              Images
-            </button>
-          )}
-          {has360 && (
-            <button
-              className={tab === "360" ? "active" : ""}
-              onClick={() => setTab("360")}
-            >
-              360°
-            </button>
-          )}
-          {has3D && (
-            <button
-              className={tab === "3d" ? "active" : ""}
-              onClick={() => setTab("3d")}
-            >
-              3D Model
-            </button>
-          )}
-        </div>
-
-        {/* Content area */}
         <div className="vq-body">
-          {tab === "images" && hasImages && (
-            <div className="vq-gallery">
-              <Slider {...sliderSettings}>
-                {vehicle.images.map((img, idx) => (
-                  <div key={idx}>
-                    <img src={img.url} alt="" />
-                  </div>
-                ))}
-              </Slider>
-            </div>
-          )}
+          <div className="vq-body-content">
+          {/* Left: Image */}
+          <div className="vq-left">
+            <img src={mainImg} alt={vehicle.title} />
+          </div>
 
-          {tab === "360" && has360 && (
-            <div className="vq-360-wrap">
-              <React360Viewer
-                amount={vehicle.spinImages.length}
-                imagePath=""  // if using pattern, adjust
-                images={vehicle.spinImages} // library supports direct images array
-                autoplay
-                loop
+          {/* Right: Details */}
+          <div className="vq-right">
+            <h2 className="vq-price">KES {Number(vehicle.price).toLocaleString()}</h2>
+
+            <div className="vq-specs">
+              <p><FaStopwatch /> Year: {vehicle.year}</p>
+              <p><FaCarSide /> Mileage: {Number(vehicle.mileage).toLocaleString()} km</p>
+              <p><FaGasPump /> Fuel: {vehicle.fuelType}</p>
+              <p>Transmission: {vehicle.transmission}</p>
+              <p>Engine: {vehicle.engineCapacity}</p>
+            </div>
+
+            {/* ===== Loan calculator ===== */}
+            <div className="vq-box">
+              <h4>Loan Calculator</h4>
+
+              <label>Deposit Percentage</label>
+              <input
+                type="range"
+                min="20"
+                max="70"
+                value={depositPercent}
+                onChange={(e) => setDepositPercent(Number(e.target.value))}
               />
+              <p>{depositPercent}% Deposit</p>
+
+              <label>Financing Months</label>
+              <select value={months} onChange={(e) => setMonths(Number(e.target.value))}>
+                <option value="6">6 months</option>
+                <option value="9">9 months</option>
+                <option value="12">12 months</option>
+                <option value="18">18 months</option>
+              </select>
+
+              <div className="vq-calc-result">
+                <p>Loan Amount: <strong>KES {loanAmount.toLocaleString()}</strong></p>
+                <p>Monthly Repayment: <strong>KES {monthlyPay.toLocaleString()}</strong></p>
+              </div>
             </div>
-          )}
 
-          {tab === "3d" && has3D && (
-            <div className="vq-3d-wrap">
-              {/* model-viewer custom element */}
-              <model-viewer
-                src={vehicle.model3dUrl}
-                alt="3D view of vehicle"
-                camera-controls
-                auto-rotate
-                style={{ width: "100%", height: "350px" }}
-                exposure="0.9"
-                shadow-intensity="1"
-              ></model-viewer>
+            {/* ===== Duty calculator ===== */}
+            <div className="vq-box">
+              <h4>Estimated Duty</h4>
+              <p>Approx. KRA Duty: <strong>KES {duty.toLocaleString()}</strong></p>
+              <p className="vq-duty-note">
+                * Final duty varies based on KRA valuation, engine size & year.
+              </p>
             </div>
-          )}
-        </div>
 
-        {/* Basic spec summary */}
-        <div className="vq-specs">
-          <h4>Key Specs</h4>
-          <ul>
-            {vehicle.mileage != null && (
-              <li>Mileage: {Number(vehicle.mileage).toLocaleString()} km</li>
-            )}
-            {vehicle.engineCapacity && (
-              <li>Engine: {vehicle.engineCapacity} cc</li>
-            )}
-            {vehicle.color && <li>Color: {vehicle.color}</li>}
-            <li>Condition: {vehicle.condition || "Used"}</li>
-            {vehicle.stockNumber && <li>BF Stock No: {vehicle.stockNumber}</li>}
-          </ul>
+            <button
+              className="vq-request-btn"
+              onClick={() => setShowRequest(true)}
+            >
+              Proceed With Import Request
+            </button>
+          </div>
         </div>
-
-        <div className="vq-footer">
-          <button className="vq-btn-primary">
-            Proceed to Request Import
-          </button>
         </div>
       </div>
-    </div>
+
+      {/* Request Modal */}
+      {showRequest && (
+        <RequestImportModal
+          vehicle={vehicle}
+          onClose={() => setShowRequest(false)}
+        />
+      )}
+    </>
   );
 };
 
