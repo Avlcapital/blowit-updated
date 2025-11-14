@@ -11,6 +11,7 @@ import {
   deleteVehicleImage,
   exportVehiclesCSV,
   importVehiclesCSV,
+  getPublicVehicles,
 } from "../controllers/vehicleController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 import upload from "../middleware/multer.js";
@@ -36,6 +37,9 @@ router.post("/import/csv", protect, adminOnly, upload.single("file"), importVehi
 
 //Befoward sync
 router.post("/import/beforward", protect, adminOnly, importFromBeForward);
+
+// Public browsing route (no auth needed)
+router.get("/browse", getPublicVehicles);
 
 
 export default router;

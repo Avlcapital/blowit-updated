@@ -17,6 +17,7 @@ export const createVehicle = async (req, res) => {
 };
 
 /* LIST + FILTER + PAGINATE */
+/* LIST + FILTER + PAGINATE */
 export const getVehicles = async (req, res) => {
   try {
     const {
@@ -28,25 +29,50 @@ export const getVehicles = async (req, res) => {
       maxPrice,
       page = 1,
       limit = 20,
-      q, // free text on title / model
+      q, 
     } = req.query;
 
     const query = {};
-    if (brand) query.brand = brand;
-    if (model) query.model = model;
-    if (year) query.year = Number(year);
-    if (status) query.status = status;
-    if (minPrice || maxPrice) query.price = { $gte: Number(minPrice || 0), $lte: Number(maxPrice || 1e12) };
-    if (q) query.$or = [{ title: new RegExp(q, "i") }, { model: new RegExp(q, "i") }];
+
+    if (brand && brand.trim() !== "") query.brand = brand.trim();
+    if (model && model.trim() !== "") query.model = model.trim();
+    if (year && year.trim() !== "") query.year = Number(year);
+    if (status && status.trim() !== "") query.status = status.trim();
+
+    // price range only applied if values exist
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = Number(minPrice);
+      if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+
+    // free text search
+    if (q && q.trim() !== "") {
+      query.$or = [
+        { title: new RegExp(q.trim(), "i") },
+        { model: new RegExp(q.trim(), "i") },
+        { brand: new RegExp(q.trim(), "i") },
+      ];
+    }
 
     const skip = (Number(page) - 1) * Number(limit);
 
     const [vehicles, total] = await Promise.all([
-      Vehicle.find(query).skip(skip).limit(Number(limit)).sort({ createdAt: -1 }),
+      Vehicle.find(query)
+        .skip(skip)
+        .limit(Number(limit))
+        .sort({ createdAt: -1 }),
       Vehicle.countDocuments(query),
     ]);
 
-    res.json({ success: true, vehicles, total, page: Number(page), pages: Math.ceil(total / Number(limit)) });
+    res.json({
+      success: true,
+      vehicles,
+      total,
+      page: Number(page),
+      pages: Math.ceil(total / Number(limit)),
+    });
+
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -221,6 +247,90 @@ export const importFromBeForward = async (req, res) => {
     await beforwardQueue.add({ feedUrl: process.env.BEFORWARD_FEED_URL }, { attempts: 3, backoff: 60000 });
     res.json({ success: true, message: "Be Forward sync queued." });
   } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const getPublicVehicles = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 12,
+      q = "",
+      brand = "",
+      model = "",
+      minYear = "",
+      maxYear = "",
+      minPrice = "",
+      maxPrice = "",
+      transmission = "",
+      fuelType = "",
+      status = "",
+      sort = "latest",
+    } = req.query;
+
+    const filter = {};
+
+    // Only show available vehicles
+    filter.status = "Available";
+
+    // SEARCH TEXT
+    if (q.trim() !== "") {
+      filter.$or = [
+        { title: { $regex: q.trim(), $options: "i" } },
+        { model: { $regex: q.trim(), $options: "i" } },
+        { brand: { $regex: q.trim(), $options: "i" } }
+      ];
+    }
+
+    if (brand.trim() !== "") filter.brand = brand.trim();
+    if (model.trim() !== "") filter.model = model.trim();
+    if (transmission.trim() !== "") filter.transmission = transmission.trim();
+    if (fuelType.trim() !== "") filter.fuelType = fuelType.trim();
+
+    // YEAR RANGE
+    if (minYear.trim() !== "" || maxYear.trim() !== "") {
+      filter.year = {};
+      if (minYear.trim() !== "") filter.year.$gte = Number(minYear);
+      if (maxYear.trim() !== "") filter.year.$lte = Number(maxYear);
+    }
+
+    // PRICE RANGE
+    if (minPrice.trim() !== "" || maxPrice.trim() !== "") {
+      filter.price = {};
+      if (minPrice.trim() !== "") filter.price.$gte = Number(minPrice);
+      if (maxPrice.trim() !== "") filter.price.$lte = Number(maxPrice);
+    }
+
+    // SORT
+    const sortMap = {
+      latest: { createdAt: -1 },
+      oldest: { createdAt: 1 },
+      price_low: { price: 1 },
+      price_high: { price: -1 },
+      mileage_low: { mileage: 1 },
+      mileage_high: { mileage: -1 },
+    };
+
+    const sorting = sortMap[sort] || sortMap.latest;
+
+    const total = await Vehicle.countDocuments(filter);
+
+    const vehicles = await Vehicle.find(filter)
+      .sort(sorting)
+      .skip((Number(page) - 1) * Number(limit))
+      .limit(Number(limit));
+
+    res.json({
+      success: true,
+      vehicles,
+      page: Number(page),
+      pages: Math.ceil(total / Number(limit)),
+      total,
+    });
+
+  } catch (err) {
+    console.error("PUBLIC VEHICLES ERROR:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 };
