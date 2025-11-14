@@ -6,6 +6,7 @@ import {
   FaUser,
   FaSignOutAlt,
   FaTimes,
+  FaHeart
 } from "react-icons/fa";
 import "../../styles/customer/CustomerSidebar.css";
 
@@ -36,6 +37,12 @@ const CustomerSidebar = ({ isOpen, toggleSidebar }) => {
         <li>
           <Link to="/customer/vehicles" onClick={toggleSidebar}>
             <FaCarAlt /> <span>Browse Vehicles</span>
+          </Link>
+        </li>
+
+        <li>
+          <Link to="/customer/favorites" onClick={toggleSidebar}>
+            <FaHeart /> <span>Favourite</span>
           </Link>
         </li>
 

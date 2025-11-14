@@ -1,0 +1,43 @@
+.fav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.fav-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.6rem;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.fav-card img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.fav-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.6rem;
+}
+
+.fav-actions button {
+  background: #003366;
+  color: #fff;
+  border: none;
+  padding: 0.45rem 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.fav-actions button:first-child {
+  background: #d62828;
+}
+
+.cv-icon-btn.fav.active svg {
+  color: #d62828;
+  fill: #d62828;
+}

@@ -15,6 +15,7 @@ import AdminUsers from './pages/admin/AdminUsers'
 import CustomerRoute from './components/Routes/CustomerRoute'
 import CustomerDashboard from './pages/customer/CustomerDashboard'
 import CustomerVehicles from './pages/customer/CustomerVehicles'
+import CustomerFavourites from './pages/customer/CustomerFavourites'
 
 function App() {
   
@@ -80,6 +81,15 @@ function App() {
           element={
            <CustomerRoute>
              <CustomerVehicles />
+           </CustomerRoute>
+          }
+        />
+
+        <Route
+          path="/customer/favorites"
+          element={
+           <CustomerRoute>
+             <CustomerFavourites />
            </CustomerRoute>
           }
         />

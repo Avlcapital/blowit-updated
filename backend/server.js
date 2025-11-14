@@ -13,6 +13,8 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
+import wishlistRoutes from "./routes/wishlistRoutes.js";
+
 
 dotenv.config();
 connectDB();
@@ -31,6 +33,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/customer", customerRoutes);
+app.use("/api/wishlist", wishlistRoutes);
 
 
 // Default

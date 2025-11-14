@@ -8,6 +8,7 @@ import {
   FaHeart,
   FaEye,
   FaPlayCircle,
+  FaBalanceScale,
 } from "react-icons/fa";
 
 import api from "../../utils/api";
@@ -16,6 +17,7 @@ import CustomerLayout from "../../components/Customer/CustomerLayout";
 
 import VehicleQuickViewModal from "../../components/Customer/VehicleQuickViewModal";
 import Vehicle3DViewerModal from "../../components/Customer/Vehicle3DViewerModal";
+import VehicleCompareModal from "../../components/Customer/VehicleCompareModal";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -23,6 +25,8 @@ import "../../styles/customer/CustomerVehicles.css";
 
 const CustomerVehicles = () => {
   const [vehicles, setVehicles] = useState([]);
+  const [favourites, setFavourites] = useState([]); // wishlist IDs
+
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
@@ -41,6 +45,57 @@ const CustomerVehicles = () => {
   const [quickViewVehicle, setQuickViewVehicle] = useState(null);
   const [viewer3DVehicle, setViewer3DVehicle] = useState(null);
 
+  // 🔹 Compare state
+  const [compareList, setCompareList] = useState([]); // array of vehicle objects
+  const [showCompare, setShowCompare] = useState(false);
+
+  /* --------------------- FAVOURITES --------------------- */
+  const loadFavourites = async () => {
+    try {
+      const res = await api.get(`${BASE_URL}/api/wishlist`);
+      if (res.data.success) {
+        const favIds = res.data.favourites.map((x) => x._id);
+        setFavourites(favIds);
+      }
+    } catch {
+      console.log("Failed to load favourites");
+    }
+  };
+
+  const isFav = (id) => favourites.includes(id);
+
+  const toggleFavourite = async (vehicleId) => {
+    try {
+      if (isFav(vehicleId)) {
+        await api.delete(`${BASE_URL}/api/wishlist/${vehicleId}`);
+        setFavourites((prev) => prev.filter((x) => x !== vehicleId));
+      } else {
+        await api.post(`${BASE_URL}/api/wishlist/add`, { vehicleId });
+        setFavourites((prev) => [...prev, vehicleId]);
+      }
+    } catch {
+      alert("Failed to update favourites");
+    }
+  };
+
+  /* --------------------- COMPARE --------------------- */
+  const isInCompare = (id) => compareList.some((v) => v._id === id);
+
+  const toggleCompare = (vehicle) => {
+    if (isInCompare(vehicle._id)) {
+      setCompareList((prev) => prev.filter((v) => v._id !== vehicle._id));
+      return;
+    }
+    if (compareList.length >= 3) {
+      alert("You can compare up to 3 vehicles at a time.");
+      return;
+    }
+    setCompareList((prev) => [...prev, vehicle]);
+  };
+
+  const clearCompare = () => setCompareList([]);
+
+  /* --------------------- FETCH VEHICLES --------------------- */
   const fetchVehicles = async (overridePage) => {
     try {
       setLoading(true);
@@ -52,9 +107,7 @@ const CustomerVehicles = () => {
         ...filters,
       });
 
-      const res = await api.get(
-        `${BASE_URL}/api/vehicles/?${params.toString()}`
-      );
+      const res = await api.get(`${BASE_URL}/api/vehicles/?${params.toString()}`);
 
       if (res.data.success) {
         setVehicles(res.data.vehicles);
@@ -69,10 +122,11 @@ const CustomerVehicles = () => {
   };
 
   useEffect(() => {
+    loadFavourites();
     fetchVehicles(1);
-    // eslint-disable-next-line
   }, []);
 
+  /* --------------------- FILTERS --------------------- */
   const applyFilters = () => {
     fetchVehicles(1);
   };
@@ -92,6 +146,7 @@ const CustomerVehicles = () => {
     fetchVehicles(1);
   };
 
+  /* --------------------- CAROUSEL --------------------- */
   const sliderSettings = {
     dots: true,
     infinite: true,
@@ -100,12 +155,6 @@ const CustomerVehicles = () => {
     speed: 500,
     autoplaySpeed: 3500,
     pauseOnHover: true,
-  };
-
-  const handleFavClick = (vehicle) => {
-    // later: implement wishlist API
-    console.log("Save to wishlist", vehicle._id);
-    alert("Saved to favourites (demo)");
   };
 
   return (
@@ -208,8 +257,7 @@ const CustomerVehicles = () => {
       ) : (
         <div className="cv-grid">
           {vehicles.map((v) => {
-            const mainImg =
-              v.images?.[0]?.url || "/placeholder-car.jpg";
+            const mainImg = v.images?.[0]?.url || "/placeholder-car.jpg";
 
             return (
               <div className="cv-card" key={v._id}>
@@ -243,21 +291,22 @@ const CustomerVehicles = () => {
                     </span>
                   )}
 
-                  {/* Be Forward tag (if stockNumber or beForwardId) */}
+                  {/* Be Forward tag */}
                   {(v.stockNumber || v.beForwardId) && (
-                    <span className="cv-bf-tag">
-                      BF Japan Stock
-                    </span>
+                    <span className="cv-bf-tag">BF Japan Stock</span>
                   )}
 
-                  {/* Top-right actions */}
+                  {/* Favourites icon */}
                   <button
-                    className="cv-icon-btn fav"
-                    onClick={() => handleFavClick(v)}
+                    className={`cv-icon-btn fav ${
+                      isFav(v._id) ? "active" : ""
+                    }`}
+                    onClick={() => toggleFavourite(v._id)}
                   >
                     <FaHeart />
                   </button>
 
+                  {/* Quick view icon */}
                   <button
                     className="cv-icon-btn view"
                     onClick={() => setQuickViewVehicle(v)}
@@ -265,6 +314,7 @@ const CustomerVehicles = () => {
                     <FaEye />
                   </button>
 
+                  {/* 360 / 3D */}
                   {(v.has360 || v.model3dUrl) && (
                     <button
                       className="cv-360-btn"
@@ -300,12 +350,27 @@ const CustomerVehicles = () => {
                     )}
                   </div>
 
-                  <button
-                    className="cv-request-btn"
-                    onClick={() => setQuickViewVehicle(v)}
-                  >
-                    Request Import
-                  </button>
+                  <div className="cv-card-actions-row">
+                    <button
+                      className="cv-request-btn"
+                      onClick={() => setQuickViewVehicle(v)}
+                    >
+                      Request Import
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`cv-compare-toggle ${
+                        isInCompare(v._id) ? "active" : ""
+                      }`}
+                      onClick={() => toggleCompare(v)}
+                    >
+                      <FaBalanceScale />
+                      <span>
+                        {isInCompare(v._id) ? "Added" : "Compare"}
+                      </span>
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -334,6 +399,30 @@ const CustomerVehicles = () => {
         </div>
       )}
 
+      {/* 🔹 Compare bar (bottom) */}
+      {compareList.length > 0 && (
+        <div className="cv-compare-bar">
+          <div className="cv-compare-info">
+            <FaBalanceScale />
+            <span>
+              {compareList.length} vehicle
+              {compareList.length > 1 ? "s" : ""} selected for comparison
+            </span>
+          </div>
+          <div className="cv-compare-actions">
+            <button className="cv-compare-clear" onClick={clearCompare}>
+              Clear
+            </button>
+            <button
+              className="cv-compare-main-btn"
+              onClick={() => setShowCompare(true)}
+            >
+              Compare Now
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Quick View Modal */}
       {quickViewVehicle && (
         <VehicleQuickViewModal
@@ -347,6 +436,14 @@ const CustomerVehicles = () => {
         <Vehicle3DViewerModal
           vehicle={viewer3DVehicle}
           onClose={() => setViewer3DVehicle(null)}
+        />
+      )}
+
+      {/* Compare Modal */}
+      {showCompare && compareList.length > 0 && (
+        <VehicleCompareModal
+          vehicles={compareList}
+          onClose={() => setShowCompare(false)}
         />
       )}
     </CustomerLayout>
