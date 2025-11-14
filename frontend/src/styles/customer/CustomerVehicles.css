@@ -121,14 +121,15 @@
 
 .cv-price-badge {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: #d62828;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(214, 40, 40, 0.95);
   color: #fff;
-  padding: 0.35rem 0.7rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 700;
+  z-index: 20;
 }
 
 .cv-status-tag {
@@ -305,5 +306,109 @@
 
   .cv-btn {
     width: 100%;
+  }
+}
+
+/* Compare toggle in card */
+.cv-card-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+
+.cv-compare-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  font-size: 0.78rem;
+  cursor: pointer;
+  color: #374151;
+}
+
+.cv-compare-toggle svg {
+  font-size: 0.8rem;
+}
+
+.cv-compare-toggle.active {
+  background: #0b3d91;
+  border-color: #0b3d91;
+  color: #ffffff;
+}
+
+/* Bottom compare bar */
+.cv-compare-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0.7rem;
+  margin-inline: auto;
+  max-width: 960px;
+  background: #111827;
+  color: #f9fafb;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.5);
+  z-index: 1000;
+}
+
+.cv-compare-info {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+}
+
+.cv-compare-info svg {
+  color: #fbbf24;
+}
+
+.cv-compare-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.cv-compare-clear {
+  background: transparent;
+  border: none;
+  color: #e5e7eb;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.cv-compare-main-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  background: #f97316;
+  color: #111827;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .cv-compare-bar {
+    bottom: 0.4rem;
+    max-width: 100%;
+    border-radius: 12px;
+    margin: 0 0.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cv-compare-actions {
+    width: 100%;
+    justify-content: flex-end;
   }
 }

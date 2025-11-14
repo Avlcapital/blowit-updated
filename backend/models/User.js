@@ -17,6 +17,12 @@ const userSchema = new mongoose.Schema(
     },
     otp: String,
     otpExpires: Date,
+    favourites: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Vehicle"
+  }
+],
   },
   { timestamps: true }
 );

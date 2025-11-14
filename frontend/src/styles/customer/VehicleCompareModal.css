@@ -1,0 +1,218 @@
+.vc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  backdrop-filter: blur(3px);
+}
+
+.vc-modal {
+  background: #ffffff;
+  width: 95%;
+  max-width: 1100px;
+  border-radius: 14px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.35);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.vc-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.2rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.vc-modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #003366;
+}
+
+.vc-close {
+  cursor: pointer;
+  font-size: 1.3rem;
+  color: #4b5563;
+}
+
+/* Body */
+.vc-modal-body {
+  padding: 0.9rem 1.2rem 1rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Wrap for horizontal scroll if many columns */
+.vc-compare-grid-wrap {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 0.3rem;
+}
+
+/* Grid of vehicles (columns) */
+.vc-compare-grid {
+  display: grid;
+  gap: 1rem;
+  padding-bottom: 0.4rem;
+}
+
+.vc-col {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top section */
+.vc-top {
+  text-align: center;
+  margin-bottom: 0.6rem;
+}
+
+.vc-img-wrap {
+  width: 100%;
+  height: 150px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.vc-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vc-top h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #111827;
+}
+
+.vc-price {
+  margin: 0.25rem 0 0.2rem;
+  font-weight: 600;
+  color: #0b3d91;
+  font-size: 0.92rem;
+}
+
+.vc-status {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  margin-top: 0.1rem;
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.vc-status.available {
+  background: #e6ffed;
+  color: #047857;
+}
+
+.vc-status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.vc-status.sold {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Specs list */
+.vc-spec-list {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid #e5e7eb;
+  max-height: 230px;
+  overflow-y: auto;
+}
+
+.vc-spec-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  font-size: 0.8rem;
+  border-bottom: 1px dashed #e5e7eb;
+}
+
+.vc-spec-row:last-child {
+  border-bottom: none;
+}
+
+.vc-spec-row .label {
+  color: #6b7280;
+}
+
+.vc-spec-row .value {
+  color: #111827;
+  font-weight: 500;
+}
+
+/* Actions */
+.vc-actions {
+  margin-top: 0.6rem;
+  display: flex;
+  justify-content: center;
+}
+
+.vc-request-btn {
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: none;
+  background: #003366;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Note */
+.vc-note {
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .vc-modal {
+    width: 96%;
+    max-width: 100%;
+  }
+
+  .vc-spec-list {
+    max-height: 200px;
+  }
+
+  .vc-compare-grid {
+    min-width: 520px; /* horizontal scroll for 2–3 cols */
+  }
+}
+
+@media (max-width: 480px) {
+  .vc-modal {
+    border-radius: 10px;
+  }
+
+  .vc-compare-grid {
+    min-width: 420px;
+  }
+
+  .vc-img-wrap {
+    height: 130px;
+  }
+}
