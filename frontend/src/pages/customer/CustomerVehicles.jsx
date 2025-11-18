@@ -25,7 +25,7 @@ import "../../styles/customer/CustomerVehicles.css";
 
 const CustomerVehicles = () => {
   const [vehicles, setVehicles] = useState([]);
-  const [favourites, setFavourites] = useState([]); // wishlist IDs
+  const [favourites, setFavourites] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -45,11 +45,11 @@ const CustomerVehicles = () => {
   const [quickViewVehicle, setQuickViewVehicle] = useState(null);
   const [viewer3DVehicle, setViewer3DVehicle] = useState(null);
 
-  // 🔹 Compare state
-  const [compareList, setCompareList] = useState([]); // array of vehicle objects
+  // Compare feature
+  const [compareList, setCompareList] = useState([]);
   const [showCompare, setShowCompare] = useState(false);
 
-  /* --------------------- FAVOURITES --------------------- */
+  /* ---------------- LOAD FAVOURITES ---------------- */
   const loadFavourites = async () => {
     try {
       const res = await api.get(`${BASE_URL}/api/wishlist`);
@@ -57,7 +57,7 @@ const CustomerVehicles = () => {
         const favIds = res.data.favourites.map((x) => x._id);
         setFavourites(favIds);
       }
-    } catch {
+    } catch (err) {
       console.log("Failed to load favourites");
     }
   };
@@ -78,7 +78,7 @@ const CustomerVehicles = () => {
     }
   };
 
-  /* --------------------- COMPARE --------------------- */
+  /* ---------------- COMPARE ---------------- */
   const isInCompare = (id) => compareList.some((v) => v._id === id);
 
   const toggleCompare = (vehicle) => {
@@ -95,7 +95,7 @@ const CustomerVehicles = () => {
 
   const clearCompare = () => setCompareList([]);
 
-  /* --------------------- FETCH VEHICLES --------------------- */
+  /* ---------------- FETCH VEHICLES ---------------- */
   const fetchVehicles = async (overridePage) => {
     try {
       setLoading(true);
@@ -126,13 +126,11 @@ const CustomerVehicles = () => {
     fetchVehicles(1);
   }, []);
 
-  /* --------------------- FILTERS --------------------- */
-  const applyFilters = () => {
-    fetchVehicles(1);
-  };
+  /* ---------------- FILTERS ---------------- */
+  const applyFilters = () => fetchVehicles(1);
 
   const resetFilters = () => {
-    const base = {
+    setFilters({
       q: "",
       brand: "",
       model: "",
@@ -141,12 +139,11 @@ const CustomerVehicles = () => {
       minYear: "",
       maxYear: "",
       sort: "latest",
-    };
-    setFilters(base);
+    });
     fetchVehicles(1);
   };
 
-  /* --------------------- CAROUSEL --------------------- */
+  /* ---------------- CAROUSEL ---------------- */
   const sliderSettings = {
     dots: true,
     infinite: true,
@@ -159,7 +156,7 @@ const CustomerVehicles = () => {
 
   return (
     <CustomerLayout>
-      {/* Top header */}
+      {/* Header */}
       <div className="cv-header">
         <div>
           <h1>Find Your Next Import</h1>
@@ -178,7 +175,7 @@ const CustomerVehicles = () => {
         </div>
       </div>
 
-      {/* Filters row */}
+      {/* Filters */}
       <div className="cv-filters">
         <input
           placeholder="Brand (e.g. Toyota)"
@@ -249,7 +246,7 @@ const CustomerVehicles = () => {
         </button>
       </div>
 
-      {/* Vehicles grid */}
+      {/* Vehicles List */}
       {loading ? (
         <p className="cv-loading">Loading vehicles...</p>
       ) : vehicles.length === 0 ? (
@@ -261,7 +258,7 @@ const CustomerVehicles = () => {
 
             return (
               <div className="cv-card" key={v._id}>
-                {/* Image carousel */}
+                {/* Image Block */}
                 <div className="cv-card-media">
                   {v.images?.length > 0 ? (
                     <Slider {...sliderSettings}>
@@ -275,7 +272,7 @@ const CustomerVehicles = () => {
                     <img src={mainImg} alt={v.title || "Vehicle"} />
                   )}
 
-                  {/* Price badge */}
+                  {/* Price tag */}
                   <div className="cv-price-badge">
                     KES {Number(v.price || 0).toLocaleString()}
                   </div>
@@ -296,7 +293,7 @@ const CustomerVehicles = () => {
                     <span className="cv-bf-tag">BF Japan Stock</span>
                   )}
 
-                  {/* Favourites icon */}
+                  {/* Favourite */}
                   <button
                     className={`cv-icon-btn fav ${
                       isFav(v._id) ? "active" : ""
@@ -306,7 +303,7 @@ const CustomerVehicles = () => {
                     <FaHeart />
                   </button>
 
-                  {/* Quick view icon */}
+                  {/* Quick view */}
                   <button
                     className="cv-icon-btn view"
                     onClick={() => setQuickViewVehicle(v)}
@@ -314,7 +311,7 @@ const CustomerVehicles = () => {
                     <FaEye />
                   </button>
 
-                  {/* 360 / 3D */}
+                  {/* 3D viewer */}
                   {(v.has360 || v.model3dUrl) && (
                     <button
                       className="cv-360-btn"
@@ -325,7 +322,7 @@ const CustomerVehicles = () => {
                   )}
                 </div>
 
-                {/* Card content */}
+                {/* Card Details */}
                 <div className="cv-card-body">
                   <h3>{v.title || `${v.brand} ${v.model}`}</h3>
                   <p className="cv-location">
@@ -333,23 +330,24 @@ const CustomerVehicles = () => {
                   </p>
 
                   <div className="cv-specs-row">
-                    {v.year && (
+                    {!!v.year && (
                       <span>
                         <FaStopwatch /> {v.year}
                       </span>
                     )}
-                    {v.mileage != null && (
+                    {!!v.mileage && (
                       <span>
                         <FaCarSide /> {Number(v.mileage).toLocaleString()} km
                       </span>
                     )}
-                    {v.fuelType && (
+                    {!!v.fuelType && (
                       <span>
                         <FaGasPump /> {v.fuelType}
                       </span>
                     )}
                   </div>
 
+                  {/* Action Buttons */}
                   <div className="cv-card-actions-row">
                     <button
                       className="cv-request-btn"
@@ -359,7 +357,6 @@ const CustomerVehicles = () => {
                     </button>
 
                     <button
-                      type="button"
                       className={`cv-compare-toggle ${
                         isInCompare(v._id) ? "active" : ""
                       }`}
@@ -370,6 +367,16 @@ const CustomerVehicles = () => {
                         {isInCompare(v._id) ? "Added" : "Compare"}
                       </span>
                     </button>
+
+                    {/* NEW: View Details */}
+                    <button
+                      className="cv-details-btn"
+                      onClick={() =>
+                        (window.location.href = `/customer/vehicle/${v._id}`)
+                      }
+                    >
+                      View Details
+                    </button>
                   </div>
                 </div>
               </div>
@@ -378,7 +385,7 @@ const CustomerVehicles = () => {
         </div>
       )}
 
-      {/* Pager */}
+      {/* Pagination */}
       {!loading && pages > 1 && (
         <div className="cv-pager">
           <button
@@ -387,9 +394,11 @@ const CustomerVehicles = () => {
           >
             Prev
           </button>
+
           <span>
             Page {page} / {pages}
           </span>
+
           <button
             disabled={page >= pages}
             onClick={() => fetchVehicles(page + 1)}
@@ -399,7 +408,7 @@ const CustomerVehicles = () => {
         </div>
       )}
 
-      {/* 🔹 Compare bar (bottom) */}
+      {/* Compare bar */}
       {compareList.length > 0 && (
         <div className="cv-compare-bar">
           <div className="cv-compare-info">
@@ -409,6 +418,7 @@ const CustomerVehicles = () => {
               {compareList.length > 1 ? "s" : ""} selected for comparison
             </span>
           </div>
+
           <div className="cv-compare-actions">
             <button className="cv-compare-clear" onClick={clearCompare}>
               Clear
@@ -423,7 +433,7 @@ const CustomerVehicles = () => {
         </div>
       )}
 
-      {/* Quick View Modal */}
+      {/* Modals */}
       {quickViewVehicle && (
         <VehicleQuickViewModal
           vehicle={quickViewVehicle}
@@ -431,7 +441,6 @@ const CustomerVehicles = () => {
         />
       )}
 
-      {/* Full-screen 3D / 360 viewer */}
       {viewer3DVehicle && (
         <Vehicle3DViewerModal
           vehicle={viewer3DVehicle}
@@ -439,7 +448,6 @@ const CustomerVehicles = () => {
         />
       )}
 
-      {/* Compare Modal */}
       {showCompare && compareList.length > 0 && (
         <VehicleCompareModal
           vehicles={compareList}
