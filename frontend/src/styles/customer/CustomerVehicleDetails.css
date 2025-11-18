@@ -1,295 +1,433 @@
-/* ============================================
-   PREMIUM VEHICLE DETAILS (BeForward Style)
-   ============================================ */
+/* ===========================================================
+   VEHICLE DETAILS PAGE — PREMIUM MARKETPLACE STYLE
+   =========================================================== */
 
-/* Page container */
-.vd-container {
-  display: flex;
-  gap: 2rem;
-  padding: 1.5rem 0;
+body {
+  background: #f5f7fa;
 }
 
 /* Breadcrumb */
 .vd-breadcrumb {
-  font-size: 0.85rem;
+  margin: 1rem 0;
+  font-size: 0.95rem;
   color: #6b7280;
-  margin-bottom: 0.8rem;
 }
 
-/* ====================== LEFT GALLERY ====================== */
+/* Main layout */
+.vd-container {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+@media (max-width: 900px) {
+  .vd-container {
+    flex-direction: column;
+  }
+}
+
+/* ===========================================================
+   LEFT SECTION — GALLERY
+   =========================================================== */
 
 .vd-left {
-  flex: 2;
-}
-
-/* Main image wrapper */
-.vd-main-img-wrap {
-  position: relative;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  flex: 1.2;
 }
 
 .vd-main-img {
   width: 100%;
   height: 420px;
+  border-radius: 12px;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.25);
+  background: #000;
 }
 
-.vd-main-img:hover {
-  transform: scale(1.02);
+@media (max-width: 768px) {
+  .vd-main-img {
+    height: 260px;
+  }
 }
 
-/* Navigation arrows */
-.vd-nav-left,
-.vd-nav-right {
-  position: absolute;
-  top: 50%;
-  padding: 0.5rem;
-  background: rgba(0,0,0,0.45);
-  border: none;
-  border-radius: 50%;
-  color: #fff;
-  cursor: pointer;
-  transform: translateY(-50%);
-  z-index: 10;
-}
-
-.vd-nav-left { left: 12px; }
-.vd-nav-right { right: 12px; }
-
-.vd-nav-left:hover,
-.vd-nav-right:hover {
-  background: rgba(0,0,0,0.7);
-}
-
-/* Thumbnail row */
+/* Thumbnails */
 .vd-thumbs {
   display: flex;
-  gap: 0.6rem;
-  margin-top: 0.8rem;
+  gap: 10px;
+  margin-top: 0.75rem;
   overflow-x: auto;
-  padding-bottom: 0.3rem;
+  padding-bottom: 0.4rem;
 }
 
 .vd-thumbs img {
-  width: 88px;
-  height: 65px;
+  width: 70px;
+  height: 70px;
   object-fit: cover;
   border-radius: 8px;
   cursor: pointer;
   opacity: 0.7;
-  transition: all 0.25s ease;
+  transition: 0.2s;
   border: 2px solid transparent;
 }
 
+.vd-thumbs img.active,
 .vd-thumbs img:hover {
   opacity: 1;
-  transform: scale(1.05);
+  border-color: #0b3d91;
 }
 
-.vd-thumbs img.active {
-  opacity: 1;
-  border-color: #ff8800;
-  box-shadow: 0 0 10px rgba(255,136,0,0.4);
-}
-
-/* 360 Button */
-.vd-360-btn {
-  margin-top: 1rem;
-  padding: 0.55rem 1rem;
+/* Buttons under the gallery */
+.vd-360-btn,
+.vd-auction-btn {
+  margin-top: 0.8rem;
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 10px;
   border: none;
-  color: #fff;
   background: #0b3d91;
-  border-radius: 8px;
+  color: white;
   font-size: 0.9rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
   cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  justify-content: center;
+  transition: 0.15s;
+}
+
+.vd-auction-btn {
+  background: #d62828;
 }
 
 .vd-360-btn:hover {
-  background: #062b67;
+  background: #093068;
+}
+
+.vd-auction-btn:hover {
+  background: #b71f1f;
 }
 
 
-/* ====================== RIGHT PANEL ====================== */
+/* ===========================================================
+   RIGHT SECTION — DETAILS
+   =========================================================== */
 
 .vd-right {
-  flex: 1.2;
-  position: sticky;
-  top: 90px;
-  height: fit-content;
+  flex: 1;
+  padding-right: 1rem;
 }
 
 .vd-right h1 {
-  font-size: 1.45rem;
-  margin: 0 0 0.4rem;
-  color: #1e293b;
+  font-size: 1.8rem;
+  margin: 0;
+  color: #111827;
+  font-weight: 700;
 }
 
 .vd-price {
+  margin: 0.4rem 0 0.8rem;
+  color: #0b3d91;
   font-size: 1.7rem;
-  color: #d62828;
-  margin: 0.3rem 0 1rem;
   font-weight: 700;
 }
 
 /* Action buttons */
 .vd-actions {
   display: flex;
-  gap: 0.6rem;
-  margin-bottom: 1rem;
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
 }
 
 .vd-actions button {
-  flex: 1;
-  padding: 0.55rem;
-  border-radius: 8px;
+  padding: 0.6rem 1rem;
   border: none;
+  border-radius: 10px;
   cursor: pointer;
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   display: flex;
-  gap: 0.4rem;
   align-items: center;
-  justify-content: center;
-  background: #f3f4f6;
+  gap: 0.4rem;
+  font-weight: 600;
 }
 
-.vd-actions button:hover {
+.vd-actions button:first-child {
+  background: #0b3d91;
+  color: white;
+}
+
+.vd-actions button:last-child {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.vd-actions button:last-child:hover {
   background: #e5e7eb;
 }
 
-.vd-actions button.fav-active {
-  background: #ffe1e1;
-  color: #d62828;
-}
-
-/* Specs box */
+/* Quick specs (top) */
 .vd-specs {
   border-top: 1px solid #e5e7eb;
-  padding-top: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem 0;
   margin-bottom: 1.5rem;
 }
 
 .vd-specs p {
-  margin: 0.35rem 0;
-  font-size: 0.92rem;
+  margin: 0.3rem 0;
   display: flex;
-  gap: 0.45rem;
-  color: #475569;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #374151;
 }
 
-/* Calculator boxes */
-.vd-box {
-  background: #f8fafc;
+/* ===========================================================
+   FULL SPECS BOX
+   =========================================================== */
+
+.vd-specs-box {
+  background: #ffffff;
   border-radius: 12px;
-  padding: 1rem;
+  padding: 1.2rem;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+  margin-bottom: 1.7rem;
+}
+
+.vd-specs-box h3 {
+  font-size: 1.1rem;
+  color: #0b3d91;
   margin-bottom: 1rem;
-  border: 1px solid #e2e8f0;
+}
+
+.vd-spec-section {
+  margin-bottom: 1rem;
+}
+
+.vd-spec-section h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+  color: #111827;
+}
+
+.vd-spec-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.vd-spec-section li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.35rem 0;
+  font-size: 0.85rem;
+  border-bottom: 1px dashed #e5e7eb;
+}
+
+.vd-spec-section li span {
+  font-weight: 600;
+  color: #374151;
+}
+
+
+/* ===========================================================
+   CONDITION GRADING
+   =========================================================== */
+
+.vd-grade-box {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.2rem;
+  margin-bottom: 1.7rem;
+  box-shadow: 0 5px 18px rgba(0,0,0,0.07);
+}
+
+.vd-grade-box h3 {
+  font-size: 1.05rem;
+  color: #0b3d91;
+  margin-bottom: 1rem;
+}
+
+.vd-grade-row {
+  display: flex;
+  gap: 2rem;
+}
+
+.vd-grade-item span {
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+.vd-grade-tag {
+  margin-top: 0.3rem;
+  font-size: 1.2rem;
+  padding: 0.3rem 1rem;
+  border-radius: 10px;
+  font-weight: 700;
+  text-align: center;
+  width: fit-content;
+}
+
+/* Grade Color Codes */
+.grade-A {
+  background: #d1fae5;
+  color: #065f46;
+}
+.grade-B {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+.grade-C {
+  background: #fef9c3;
+  color: #92400e;
+}
+.grade-D {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.grade-E {
+  background: #f3e8ff;
+  color: #6d28d9;
+}
+
+/* ===========================================================
+   VEHICLE HISTORY TIMELINE
+   =========================================================== */
+
+.vd-history {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.2rem;
+  margin-bottom: 1.7rem;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+}
+
+.vd-history h3 {
+  color: #0b3d91;
+  margin-bottom: 1rem;
+}
+
+.vd-timeline {
+  position: relative;
+  padding-left: 1.3rem;
+  border-left: 2px solid #0b3d91;
+}
+
+.vd-tl-item {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.vd-tl-item svg {
+  color: #0b3d91;
+}
+
+.vd-tl-item.pending svg {
+  color: #9ca3af;
+}
+
+/* ===========================================================
+   LOAN BOX & DUTY BOX
+   =========================================================== */
+
+.vd-box {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.2rem;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+  margin-bottom: 1.7rem;
 }
 
 .vd-box h3 {
-  margin: 0 0 0.6rem;
-  font-size: 1.05rem;
-  color: #003366;
+  color: #0b3d91;
+  margin-bottom: 1rem;
 }
 
-.vd-finance p {
-  margin: 0.25rem 0;
+.vd-finance {
+  margin-top: 0.5rem;
   font-size: 0.9rem;
 }
 
-.vd-note {
-  font-size: 0.75rem;
-  color: #6b7280;
-}
-
-/* Request button */
+/* Request Button */
 .vd-request-btn {
   width: 100%;
-  padding: 0.75rem;
-  background: #0b3d91;
-  border: none;
-  color: #fff;
-  font-size: 1rem;
+  padding: 0.85rem;
   border-radius: 10px;
-  font-weight: 600;
+  border: none;
+  background: #0b3d91;
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
+  margin-top: 0.8rem;
+  transition: 0.2s;
 }
 
 .vd-request-btn:hover {
-  background: #062b67;
+  background: #093068;
 }
 
+/* ===========================================================
+   AUCTION SHEET MODAL (PDF + IMAGE)
+   =========================================================== */
 
-/* ====================== SIMILAR VEHICLES ====================== */
-
-.vd-similar-section {
-  margin-top: 2.5rem;
+.vd-auction-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.vd-similar-section h2 {
-  font-size: 1.3rem;
-  margin-bottom: 1rem;
-  color: #1e293b;
-}
-
-.vd-similar-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
-}
-
-.vd-similar-card {
+.vd-auction-modal {
+  width: 90%;
+  max-width: 780px;
+  max-height: 90vh;
+  overflow: auto;
   background: #fff;
+  padding: 1rem;
   border-radius: 12px;
-  padding: 0.8rem;
-  text-decoration: none;
-  color: inherit;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 0 30px rgba(0,0,0,0.35);
 }
 
-.vd-similar-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.12);
-}
-
-.vd-similar-card img {
+.vd-auction-modal img,
+.vd-auction-modal iframe {
   width: 100%;
-  height: 120px;
-  object-fit: cover;
+  height: auto;
   border-radius: 10px;
 }
 
-.vd-similar-card span {
-  font-weight: 600;
-  color: #d62828;
+/* PDF viewer */
+.vd-auction-modal iframe {
+  height: 85vh;
 }
 
-
-/* ====================== 360 VIEWER MODAL ====================== */
+/* ===========================================================
+   360 VIEWER MODAL
+   =========================================================== */
 
 .vd-360-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(3px);
+  backdrop-filter: blur(4px);
+  background: rgba(0,0,0,0.55);
+  z-index: 1800;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
 }
 
 .vd-360-modal {
   width: 90%;
-  height: 80vh;
-  background: #000;
-  border-radius: 12px;
+  max-width: 900px;
+  height: 90vh;
+  background: #111;
+  border-radius: 14px;
   overflow: hidden;
 }
 
@@ -298,43 +436,25 @@
   height: 100%;
 }
 
+/* ===========================================================
+   MOBILE RESPONSIVENESS
+   =========================================================== */
 
-/* ====================== RESPONSIVE ====================== */
+@media (max-width: 600px) {
+  .vd-grade-row {
+    flex-direction: column;
+    gap: 1rem;
+  }
 
-@media (max-width: 1024px) {
-  .vd-container {
+  .vd-timeline {
+    padding-left: 1rem;
+  }
+
+  .vd-spec-section li {
+    font-size: 0.8rem;
+  }
+
+  .vd-actions {
     flex-direction: column;
   }
-
-  .vd-right {
-    position: relative;
-    top: 0;
-  }
-
-  .vd-main-img {
-    height: 360px;
-  }
-}
-
-@media (max-width: 768px) {
-  .vd-main-img { height: 300px; }
-
-  .vd-actions button {
-    font-size: 0.85rem;
-  }
-}
-
-@media (max-width: 500px) {
-  .vd-main-img { height: 240px; }
-
-  .vd-request-btn {
-    position: fixed;
-    bottom: 15px;
-    left: 5%;
-    width: 90%;
-    z-index: 999;
-    border-radius: 999px;
-  }
-
-  .vd-container { padding-bottom: 4rem; }
 }
