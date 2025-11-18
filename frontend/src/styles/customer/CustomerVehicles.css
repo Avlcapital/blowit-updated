@@ -396,6 +396,25 @@
   cursor: pointer;
 }
 
+.cv-details-btn {
+  width: 100%;
+  padding: 0.55rem;
+  border-radius: 999px;
+  border: 1px solid #0b3d91;
+  background: #ffffff;
+  color: #0b3d91;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+  margin-top: 0.4rem;
+}
+
+.cv-details-btn:hover {
+  background: #0b3d91;
+  color: #fff;
+}
+
+
 /* Mobile */
 @media (max-width: 768px) {
   .cv-compare-bar {
