@@ -7,21 +7,27 @@ const orderSchema = new mongoose.Schema(
       ref: "Vehicle",
       required: true,
     },
+
     customer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
 
-    //Payment details
+    fullName: String,
+    phone: String,
+    email: String,
+
+    depositPercent: { type: Number, default: 30 },
+
     totalPrice: { type: Number, required: true },
-    depositAmount: { type: Number, default: 0 },
-    balanceAmount: { type: Number, default: 0 },
+    depositAmount: { type: Number, required: true },
+    balanceAmount: { type: Number, required: true },
+
     depositPaid: { type: Boolean, default: false },
     financedByAvlc: { type: Boolean, default: false },
     finalPaymentDone: { type: Boolean, default: false },
 
-    //Status flow
     status: {
       type: String,
       enum: [
@@ -36,7 +42,6 @@ const orderSchema = new mongoose.Schema(
       default: "Pending",
     },
 
-    //Stage timestamps
     stageTimestamps: {
       depositPaidAt: Date,
       financedAt: Date,
@@ -45,8 +50,8 @@ const orderSchema = new mongoose.Schema(
       completedAt: Date,
     },
 
-    //Supporting info
     notes: String,
+
     shippingDocs: [
       {
         url: String,

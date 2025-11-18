@@ -1,4 +1,4 @@
-import api from "./api";
+/*import api from "./api";
 import { BASE_URL } from "./config";
 
 // 1. Create Order
@@ -14,4 +14,13 @@ export const initiatePesaLinkPayment = async ({ orderId, amount, phone, email })
     phone,
     email,
   });
-};
+};*/
+
+import api from "./api";
+import { BASE_URL } from "./config";
+
+export const createImportOrder = (data) =>
+  api.post(`${BASE_URL}/api/orders/create`, data);
+
+export const initiatePesaLinkPayment = (data) =>
+  api.post(`${BASE_URL}/api/payments/pesalink/initiate`, data);
