@@ -5,21 +5,39 @@ import { sendMail } from "../utils/email.js";
 import { orderEmails } from "../utils/templates/orderEmails.js";
 
 import { getIO } from "../socket.js";
+import PDFDocument from "pdfkit";
 
 /* CREATE ORDER */
 export const createOrder = async (req, res) => {
   try {
-    const { vehicleId, fullName, phone, email, price, depositAmount } = req.body;
+    const { vehicleId, fullName, phone, email, depositPercent } = req.body;
+    const customerId = req.user._id;
+
+    const vehicle = await Vehicle.findById(vehicleId);
+    if (!vehicle) {
+      return res.status(404).json({ success: false, message: "Vehicle not found" });
+    }
+
+    const price = Number(vehicle.price);
+    const dp = Number(depositPercent);
+
+    const depositAmount = Math.round((dp / 100) * price);
+    const balanceAmount = price - depositAmount;
 
     const order = await Order.create({
-      customer: req.user._id,
       vehicle: vehicleId,
+      customer: customerId,
+
       fullName,
       phone,
       email,
+
+      depositPercent: dp,
       totalPrice: price,
       depositAmount,
-      paymentStatus: "PENDING",
+      balanceAmount,
+
+      status: "Pending",
     });
 
     // notify customer (non-blocking)
@@ -64,6 +82,118 @@ export const getMyOrders = async (req, res) => {
     res.json({ success: true, orders });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+/*export const getMyOrders = async (req, res) => {
+  try {
+    const {
+      status,           // optional: filter by status
+      page = 1,
+      limit = 10,
+      sort = "latest",  // latest | oldest
+    } = req.query;
+
+    const query = { customer: req.user._id };
+
+    if (status && status !== "all") {
+      query.status = status;
+    }
+
+    const sortMap = {
+      latest: { createdAt: -1 },
+      oldest: { createdAt: 1 },
+    };
+    const sorting = sortMap[sort] || sortMap.latest;
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const [orders, total] = await Promise.all([
+      Order.find(query)
+        .populate("vehicle")
+        .sort(sorting)
+        .skip(skip)
+        .limit(Number(limit)),
+      Order.countDocuments(query),
+    ]);
+
+    res.json({
+      success: true,
+      orders,
+      total,
+      page: Number(page),
+      pages: Math.ceil(total / Number(limit)),
+    });
+  } catch (err) {
+    console.error("getMyOrders error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};*/
+
+/* ============================
+   CUSTOMER: SINGLE ORDER DETAIL
+   ============================ */
+export const getMyOrderById = async (req, res) => {
+  try {
+    const order = await Order.findOne({
+      _id: req.params.id,
+      customer: req.user._id,
+    }).populate("vehicle");
+
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    res.json({ success: true, order });
+  } catch (err) {
+    console.error("getMyOrderById error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/* ============================
+   CUSTOMER: REQUEST CANCELLATION
+   ============================ */
+export const requestOrderCancellation = async (req, res) => {
+  try {
+    const { reason } = req.body;
+
+    const order = await Order.findOne({
+      _id: req.params.id,
+      customer: req.user._id,
+    });
+
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    // Optional: disallow if already completed / cancelled
+    if (["COMPLETED", "CANCELLED", "REJECTED"].includes(order.status)) {
+      return res.status(400).json({
+        success: false,
+        message: "This order can no longer be cancelled.",
+      });
+    }
+
+    order.cancellationRequested = true;
+    order.cancellationReason = reason || "";
+    order.cancellationRequestedAt = new Date();
+
+    await order.save();
+
+    // TODO: notify admin via email / socket if you want
+    res.json({
+      success: true,
+      message: "Cancellation request sent. AVLC will contact you.",
+      order,
+    });
+  } catch (err) {
+    console.error("requestOrderCancellation error:", err);
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -209,5 +339,49 @@ export const uploadOrderDocs = async (req, res) => {
     res.json({ success: true, message: "Documents uploaded", order });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+export const generateOrderSummaryPDF = async (req, res) => {
+  try {
+    const order = await Order.findOne({
+      _id: req.params.id,
+      customer: req.user._id,
+    }).populate("vehicle");
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    const doc = new PDFDocument();
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=order_${order._id}.pdf`);
+
+    doc.pipe(res);
+
+    doc.fontSize(22).text("AVLC Vehicle Order Summary", { underline: true });
+    doc.moveDown();
+
+    doc.fontSize(14).text(`Order ID: ${order._id}`);
+    doc.text(`Date: ${order.createdAt}`);
+    doc.text(`Status: ${order.status}`);
+    doc.moveDown();
+
+    doc.fontSize(16).text("Vehicle Details", { underline: true });
+    doc.fontSize(12).text(`Brand: ${order.vehicle.brand}`);
+    doc.text(`Model: ${order.vehicle.model}`);
+    doc.text(`Year: ${order.vehicle.year}`);
+    doc.text(`Mileage: ${order.vehicle.mileage}`);
+    doc.moveDown();
+
+    doc.fontSize(16).text("Financials", { underline: true });
+    doc.fontSize(12).text(`Total Price: KES ${order.totalPrice}`);
+    doc.text(`Deposit: KES ${order.depositAmount}`);
+    doc.text(`Balance: KES ${order.balanceAmount}`);
+
+    doc.end();
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 };

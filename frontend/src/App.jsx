@@ -17,6 +17,7 @@ import CustomerDashboard from './pages/customer/CustomerDashboard'
 import CustomerVehicles from './pages/customer/CustomerVehicles'
 import CustomerFavourites from './pages/customer/CustomerFavourites'
 import CustomerVehicleDetails from './pages/customer/CustomerVehicleDetails'
+import CustomerOrders from './pages/customer/CustomerOrders'
 
 function App() {
   
@@ -94,6 +95,16 @@ function App() {
            </CustomerRoute>
           }
         />
+
+        <Route
+          path="/customer/orders"
+          element={
+           <CustomerRoute>
+             <CustomerOrders />
+           </CustomerRoute>
+          }
+        />
+
 
         <Route path="/customer/vehicle/:id" element={<CustomerVehicleDetails />} />
 

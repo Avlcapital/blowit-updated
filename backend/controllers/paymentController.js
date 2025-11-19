@@ -5,68 +5,54 @@ import crypto from "crypto";
 
 export const initiatePesaLink = async (req, res) => {
   try {
-    const userId = req.user._id; // from auth middleware
-    const { orderId, amount, phone, email } = req.body;
+    const userId = req.user._id;
+    const { orderId, phone, email } = req.body;
 
-    // 1. Validate order
     const order = await Order.findOne({ _id: orderId, customer: userId });
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
-    // 2. Decide how much to pay now (deposit or full)
-    const payAmount = amount || order.depositAmount || order.totalPrice;
+    const payAmount = order.depositAmount;
 
-    // 3. Build iPay payload
     const invoiceId = `BW-${order._id}-${Date.now()}`;
 
     const fields = {
       vid: IPAY_VENDOR,
-      amount: payAmount.toFixed(0),
-      tel: phone || order.customerPhone || "",
-      eml: email || order.customerEmail || "",
+      amount: payAmount,
+      tel: phone,
+      eml: email,
       curr: "KES",
       ref: invoiceId,
       cbk: process.env.IPAY_CALLBACK_URL,
-      cst: "1", // 1 = iPay will show its response page then redirect back
-      crl: "2", // 2 = always callback
-      // channel specifies payment method; for PesaLink use "PESALINK" or per iPay docs
-      p1: "PESALINK", // you can use p1..p4 for metadata
+      cst: "1",
+      crl: "2",
+      p1: "PESALINK",
       p2: order._id.toString(),
       p3: userId.toString(),
-      p4: "blowit-import",
     };
 
-    // 4. Generate hash as iPay expects – adjust order if needed
     const hash = generateIpayHash(fields);
 
-    // 5. Save a pending payment record in DB (optional but recommended)
     order.paymentProvider = "IPAY";
     order.paymentRef = invoiceId;
     order.paymentStatus = "PENDING";
     await order.save();
 
-    // 6. Respond with a redirect URL for frontend
-    const query = new URLSearchParams({
+    const redirectUrl = `${IPAY_INIT_URL}?${new URLSearchParams({
       ...fields,
       hsh: hash,
-      // if iPay wants explicit payment method use "pesalink" param as per docs
       pesalink: "1",
-    }).toString();
+    }).toString()}`;
 
-    const redirectUrl = `${IPAY_INIT_URL}?${query}`;
+    res.json({ success: true, redirectUrl });
 
-    res.json({
-      success: true,
-      redirectUrl,
-      orderId: order._id,
-      invoiceId,
-    });
   } catch (err) {
-    console.error("iPay PesaLink init error:", err);
-    res.status(500).json({ success: false, message: "Payment init failed" });
+    console.error("PAYMENT ERROR:", err);
+    res.status(500).json({ success: false, message: err.message });
   }
 };
+
 
 export const ipayCallback = async (req, res) => {
   try {

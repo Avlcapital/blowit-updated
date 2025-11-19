@@ -7,6 +7,9 @@ import {
   updateOrderStatus,
   deleteOrder,
   uploadOrderDocs,
+  getMyOrderById,
+  requestOrderCancellation,
+  generateOrderSummaryPDF,
 } from "../controllers/orderController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
@@ -16,6 +19,10 @@ const upload = multer({ dest: "uploads/" });
 // CUSTOMER
 router.post("/create", protect, createOrder);
 router.get("/my", protect, getMyOrders);
+router.get("/my/:id", protect, getMyOrderById);
+router.post("/:id/request-cancel", protect, requestOrderCancellation);
+router.get("/:id/summary-pdf", protect, generateOrderSummaryPDF);
+
 
 // ADMIN / AVLC
 router.get("/", protect, adminOnly, getAllOrders);
