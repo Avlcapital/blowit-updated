@@ -265,14 +265,10 @@ export const getPublicVehicles = async (req, res) => {
       maxPrice = "",
       transmission = "",
       fuelType = "",
-      status = "",
       sort = "latest",
     } = req.query;
 
     const filter = {};
-
-    // Only show available vehicles
-    filter.status = "Available";
 
     // SEARCH TEXT
     if (q.trim() !== "") {
@@ -289,31 +285,32 @@ export const getPublicVehicles = async (req, res) => {
     if (fuelType.trim() !== "") filter.fuelType = fuelType.trim();
 
     // YEAR RANGE
-    if (minYear.trim() !== "" || maxYear.trim() !== "") {
+    if (minYear || maxYear) {
       filter.year = {};
-      if (minYear.trim() !== "") filter.year.$gte = Number(minYear);
-      if (maxYear.trim() !== "") filter.year.$lte = Number(maxYear);
+      if (minYear) filter.year.$gte = Number(minYear);
+      if (maxYear) filter.year.$lte = Number(maxYear);
     }
 
     // PRICE RANGE
-    if (minPrice.trim() !== "" || maxPrice.trim() !== "") {
+    if (minPrice || maxPrice) {
       filter.price = {};
-      if (minPrice.trim() !== "") filter.price.$gte = Number(minPrice);
-      if (maxPrice.trim() !== "") filter.price.$lte = Number(maxPrice);
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
 
-    // SORT
+    // SORT MAP
     const sortMap = {
       latest: { createdAt: -1 },
       oldest: { createdAt: 1 },
       price_low: { price: 1 },
       price_high: { price: -1 },
       mileage_low: { mileage: 1 },
-      mileage_high: { mileage: -1 },
+      mileage_high: { mileage: -1 }
     };
 
     const sorting = sortMap[sort] || sortMap.latest;
 
+    // QUERY
     const total = await Vehicle.countDocuments(filter);
 
     const vehicles = await Vehicle.find(filter)
@@ -334,3 +331,93 @@ export const getPublicVehicles = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+
+// export const getPublicVehicles = async (req, res) => {
+//   try {
+//     const {
+//       page = 1,
+//       limit = 20,
+//       q,
+//       brand,
+//       model,
+//       year,
+//       minYear,
+//       maxYear,
+//       minPrice,
+//       maxPrice,
+//       priceRange,
+//       sort = "latest",
+//     } = req.query;
+
+//     const filter = {};
+
+//     /* ----------------- TEXT SEARCH ----------------- */
+//     if (q) {
+//       filter.$or = [
+//         { title: { $regex: q, $options: "i" } },
+//         { brand: { $regex: q, $options: "i" } },
+//         { model: { $regex: q, $options: "i" } },
+//       ];
+//     }
+
+//     /* ----------------- BRAND & MODEL ----------------- */
+//     if (brand) filter.brand = new RegExp(brand, "i");
+//     if (model) filter.model = new RegExp(model, "i");
+
+//     /* ----------------- YEAR FILTERS ----------------- */
+//     if (year) filter.year = Number(year);
+
+//     if (minYear || maxYear) {
+//       filter.year = {};
+//       if (minYear) filter.year.$gte = Number(minYear);
+//       if (maxYear) filter.year.$lte = Number(maxYear);
+//     }
+
+//     /* ----------------- PRICE ----------------- */
+//     if (priceRange) {
+//       const [minP, maxP] = priceRange.split("-");
+//       filter.price = { $gte: Number(minP), $lte: Number(maxP) };
+//     }
+
+//     if (minPrice || maxPrice) {
+//       filter.price = {};
+//       if (minPrice) filter.price.$gte = Number(minPrice);
+//       if (maxPrice) filter.price.$lte = Number(maxPrice);
+//     }
+
+//     /* ----------------- SORTING ----------------- */
+//     const sortMap = {
+//       latest: { createdAt: -1 },
+//       oldest: { createdAt: 1 },
+//       price_low: { price: 1 },
+//       price_high: { price: -1 },
+//       mileage_low: { mileage: 1 },
+//       mileage_high: { mileage: -1 },
+//     };
+
+//     const sorting = sortMap[sort] || sortMap.latest;
+
+//     /* ----------------- PAGINATION ----------------- */
+//     const skip = (Number(page) - 1) * Number(limit);
+
+//     const [vehicles, total] = await Promise.all([
+//       Vehicle.find(filter)
+//         .sort(sorting)
+//         .skip(skip)
+//         .limit(Number(limit)),
+//       Vehicle.countDocuments(filter),
+//     ]);
+
+//     res.json({
+//       success: true,
+//       vehicles,
+//       total,
+//       pages: Math.ceil(total / limit),
+//       page: Number(page),
+//     });
+//   } catch (err) {
+//     res.status(500).json({ success: false, message: err.message });
+//   }
+// };
+

@@ -18,6 +18,7 @@ import CustomerVehicles from './pages/customer/CustomerVehicles'
 import CustomerFavourites from './pages/customer/CustomerFavourites'
 import CustomerVehicleDetails from './pages/customer/CustomerVehicleDetails'
 import CustomerOrders from './pages/customer/CustomerOrders'
+import PublicVehicles from './pages/PublicVehicles'
 
 function App() {
   
@@ -31,6 +32,8 @@ function App() {
         <Route path='/register' element={<Register/>}/>
         <Route path='/login' element={<Login/>}/>
         <Route path='/forgot-password' element={<ForgotPassword/>}/>
+
+        <Route path="/vehicles" element={<PublicVehicles />} />
 
         <Route
           path='/admin/dashboard'

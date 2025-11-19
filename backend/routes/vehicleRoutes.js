@@ -39,7 +39,7 @@ router.post("/import/csv", protect, adminOnly, upload.single("file"), importVehi
 router.post("/import/beforward", protect, adminOnly, importFromBeForward);
 
 // Public browsing route (no auth needed)
-router.get("/browse", getPublicVehicles);
+router.get("/public", getPublicVehicles);
 
 
 export default router;

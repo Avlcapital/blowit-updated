@@ -1,0 +1,328 @@
+/* ===============================
+   Public Vehicles Page Wrapper
+================================*/
+.pv-wrapper {
+  padding: 40px 7%;
+  background: #f8f9fb;
+  min-height: 100vh;
+}
+
+/* ===============================
+   Header & Search Bar
+================================*/
+.pv-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.pv-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.pv-header p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 25px;
+}
+
+/* Search */
+.pv-search {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  background: #fff;
+  width: 100%;
+  max-width: 550px;
+  margin: 0 auto;
+  border-radius: 60px;
+  padding: 10px 20px;
+  border: 1px solid #ddd;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.06);
+}
+
+.pv-search svg {
+  margin-top: 4px;
+  color: #777;
+}
+
+.pv-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 15px;
+}
+
+.pv-search button {
+  background: #0077ff;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.pv-search button:hover {
+  background: #005fcc;
+}
+
+/* ===============================
+   Filters Section
+================================*/
+.pv-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 35px;
+  justify-content: center;
+}
+
+.pv-filters input,
+.pv-filters select {
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 8px;
+  width: 180px;
+  outline: none;
+  font-size: 14px;
+}
+
+.pv-btn {
+  padding: 12px 22px;
+  border: none;
+  background: #0c6bff;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.pv-btn:hover {
+  background: #004ec7;
+}
+
+.pv-btn.ghost {
+  background: #ddd;
+  color: #333;
+}
+
+.pv-btn.ghost:hover {
+  background: #ccc;
+}
+
+/* ===============================
+   Grid Layout
+================================*/
+.pv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 25px;
+}
+
+/* ===============================
+   Card Layout
+================================*/
+.pv-card {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #eaeaea;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.06);
+  transition: 0.3s;
+}
+
+.pv-card:hover {
+  transform: translateY(-5px);
+}
+
+/* ===============================
+   Vehicle Image / Carousel
+================================*/
+.pv-media {
+  position: relative;
+  height: 190px;
+  background: #f4f4f4;
+}
+
+.pv-media img {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  border-bottom: 1px solid #eee;
+}
+
+/* Price Tag */
+.pv-price-tag {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: #007aff;
+  padding: 6px 12px;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* 360° button */
+.pv-360-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #000000cc;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+  transition: 0.25s;
+}
+
+.pv-360-btn:hover {
+  background: #000;
+}
+
+/* ===============================
+   Card Body
+================================*/
+.pv-body {
+  padding: 15px 18px 18px;
+}
+
+.pv-body h3 {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+/* Specs */
+.pv-specs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: #555;
+}
+
+.pv-specs span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ===============================
+   Action Buttons
+================================*/
+.pv-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pv-details-btn,
+.pv-request-btn {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+}
+
+.pv-details-btn {
+  background: #e6e6e6;
+  color: #333;
+}
+
+.pv-details-btn:hover {
+  background: #d4d4d4;
+}
+
+.pv-request-btn {
+  background: #0077ff;
+  color: white;
+}
+
+.pv-request-btn:hover {
+  background: #005fcc;
+}
+
+/* ===============================
+   Pagination
+================================*/
+.pv-pagination {
+  margin-top: 35px;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  align-items: center;
+}
+
+.pv-pagination button {
+  padding: 10px 16px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.pv-pagination button:disabled {
+  background: #b5b5b5;
+  cursor: not-allowed;
+}
+
+.pv-pagination span {
+  font-size: 15px;
+  color: #444;
+}
+
+/* ===============================
+   Empty & Loading States
+================================*/
+.pv-empty,
+.pv-loading {
+  text-align: center;
+  padding: 40px 0;
+  font-size: 16px;
+  color: #666;
+}
+
+/* ===============================
+   RESPONSIVE DESIGN
+================================*/
+@media (max-width: 768px) {
+  .pv-search {
+    max-width: 100%;
+  }
+
+  .pv-filters input,
+  .pv-filters select {
+    width: 140px;
+  }
+}
+
+@media (max-width: 550px) {
+  .pv-filters {
+    justify-content: start;
+  }
+
+  .pv-filters input,
+  .pv-filters select {
+    width: 100%;
+  }
+
+  .pv-actions {
+    flex-direction: column;
+  }
+}
