@@ -5,7 +5,14 @@ import AddVehicleModal from "../../components/Admin/AddVehicleModal";
 import EditVehicleModal from "../../components/Admin/EditVehicleModal";
 import api from "../../utils/api";
 import "../../styles/admin/AdminVehicles.css";
-import { FaPlus, FaSyncAlt, FaFileExport, FaFileImport, FaEdit, FaTrash } from "react-icons/fa";
+import {
+  FaPlus,
+  FaSyncAlt,
+  FaFileExport,
+  FaFileImport,
+  FaEdit,
+  FaTrash,
+} from "react-icons/fa";
 import { BASE_URL } from "../../utils/config";
 
 const AdminVehicles = () => {
@@ -18,7 +25,14 @@ const AdminVehicles = () => {
   const [showAdd, setShowAdd] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
 
-  const [filters, setFilters] = useState({ brand: "", model: "", year: "", status: "", q: "" });
+  const [filters, setFilters] = useState({
+    q: "",
+    brand: "",
+    model: "",
+    year: "",
+    status: "",
+  });
+
   const csvInputRef = useRef(null);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
@@ -26,8 +40,15 @@ const AdminVehicles = () => {
   const fetchVehicles = async (p = page, f = filters) => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({ page: p, limit: 20, ...f });
+
+      const params = new URLSearchParams({
+        page: p,
+        limit: 20,
+        ...f,
+      });
+
       const res = await api.get(`${BASE_URL}/api/vehicles?${params.toString()}`);
+
       if (res.data.success) {
         setVehicles(res.data.vehicles);
         setPages(res.data.pages);
@@ -46,12 +67,13 @@ const AdminVehicles = () => {
     // eslint-disable-next-line
   }, []);
 
-  const handleFilterChange = (e) => setFilters({ ...filters, [e.target.name]: e.target.value });
+  const handleFilterChange = (e) =>
+    setFilters({ ...filters, [e.target.name]: e.target.value });
 
   const applyFilters = () => fetchVehicles(1, filters);
 
   const resetFilters = () => {
-    const f = { brand: "", model: "", year: "", status: "", q: "" };
+    const f = { q: "", brand: "", model: "", year: "", status: "" };
     setFilters(f);
     fetchVehicles(1, f);
   };
@@ -71,8 +93,11 @@ const AdminVehicles = () => {
     if (!file) return;
     const fd = new FormData();
     fd.append("file", file);
+
     try {
-      await api.post(`${BASE_URL}/api/vehicles/import/csv`, fd, { headers: { "Content-Type": "multipart/form-data" } });
+      await api.post(`${BASE_URL}/api/vehicles/import/csv`, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       alert("CSV imported");
       fetchVehicles();
     } catch (err) {
@@ -94,42 +119,90 @@ const AdminVehicles = () => {
   return (
     <div className="admin-layout">
       <AdminSidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+
       <div className="admin-main">
         <AdminNavbar toggleSidebar={toggleSidebar} />
 
         <div className="admin-content">
           <div className="vehicles-header">
             <h2>Vehicles</h2>
+
             <div className="actions">
-              <button className="btn add" onClick={() => setShowAdd(true)}><FaPlus /> Add</button>
-              <button className="btn" onClick={exportCSV}><FaFileExport /> Export CSV</button>
-              <button className="btn" onClick={() => csvInputRef.current?.click()}><FaFileImport /> Import CSV</button>
-              <input type="file" accept=".csv" ref={csvInputRef} style={{ display: "none" }} onChange={importCSV} />
-              <button className="btn import" onClick={syncBeForward}><FaSyncAlt /> Sync Be Forward</button>
+              <button className="btn add" onClick={() => setShowAdd(true)}>
+                <FaPlus /> Add
+              </button>
+              <button className="btn" onClick={exportCSV}>
+                <FaFileExport /> Export CSV
+              </button>
+              <button className="btn" onClick={() => csvInputRef.current?.click()}>
+                <FaFileImport /> Import CSV
+              </button>
+
+              <input
+                type="file"
+                accept=".csv"
+                ref={csvInputRef}
+                style={{ display: "none" }}
+                onChange={importCSV}
+              />
+
+              <button className="btn import" onClick={syncBeForward}>
+                <FaSyncAlt /> Sync BeForward
+              </button>
             </div>
           </div>
 
           {/* Filters */}
           <div className="vehicle-filters">
-            <input name="q" placeholder="Search title/model..." value={filters.q} onChange={handleFilterChange} />
-            <input name="brand" placeholder="Brand" value={filters.brand} onChange={handleFilterChange} />
-            <input name="model" placeholder="Model" value={filters.model} onChange={handleFilterChange} />
-            <input name="year" type="number" placeholder="Year" value={filters.year} onChange={handleFilterChange} />
-            <select name="status" value={filters.status} onChange={handleFilterChange}>
-              <option value="">All status</option>
+            <input
+              name="q"
+              placeholder="Search..."
+              value={filters.q}
+              onChange={handleFilterChange}
+            />
+            <input
+              name="brand"
+              placeholder="Brand"
+              value={filters.brand}
+              onChange={handleFilterChange}
+            />
+            <input
+              name="model"
+              placeholder="Model"
+              value={filters.model}
+              onChange={handleFilterChange}
+            />
+            <input
+              name="year"
+              type="number"
+              placeholder="Year"
+              value={filters.year}
+              onChange={handleFilterChange}
+            />
+            <select
+              name="status"
+              value={filters.status}
+              onChange={handleFilterChange}
+            >
+              <option value="">All Status</option>
               <option>Available</option>
               <option>Pending</option>
               <option>Sold</option>
             </select>
-            <button className="btn filter" onClick={applyFilters}>Apply</button>
-            <button className="btn reset" onClick={resetFilters}>Reset</button>
+
+            <button className="btn filter" onClick={applyFilters}>
+              Apply
+            </button>
+            <button className="btn reset" onClick={resetFilters}>
+              Reset
+            </button>
           </div>
 
-          {/* Table */}
+          {/* TABLE */}
           {loading ? (
             <p>Loading...</p>
           ) : (
-            <div className="table-wrap">
+            <div className="table-container">
               <table className="vehicle-table">
                 <thead>
                   <tr>
@@ -139,35 +212,57 @@ const AdminVehicles = () => {
                     <th>Model</th>
                     <th>Year</th>
                     <th>Mileage</th>
-                    <th>Trans</th>
+                    <th>Transmission</th>
                     <th>Fuel</th>
                     <th>Price</th>
                     <th>Status</th>
-                    <th></th>
+                    <th className="actions-col">Actions</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {vehicles.map((v) => (
                     <tr key={v._id}>
                       <td>
-                        <img src={v.images?.[0]?.url || "/placeholder-car.jpg"} alt="" className="tbl-thumb" />
+                        <img
+                          src={v.images?.[0]?.url || "/placeholder-car.jpg"}
+                          alt=""
+                          className="tbl-thumb"
+                        />
                       </td>
-                      <td>{v.title}</td>
+
+                      <td className="td-title">{v.title}</td>
                       <td>{v.brand}</td>
                       <td>{v.model}</td>
                       <td>{v.year}</td>
+
                       <td>{v.mileage?.toLocaleString()}</td>
                       <td>{v.transmission}</td>
                       <td>{v.fuelType}</td>
+
                       <td>KES {Number(v.price || 0).toLocaleString()}</td>
+
                       <td>
-                        <span className={`status ${v.status?.toLowerCase()}`}>{v.status}</span>
+                        <span className={`status ${v.status?.toLowerCase()}`}>
+                          {v.status}
+                        </span>
                       </td>
+
                       <td className="row-actions">
-                        <button className="edit-btn" onClick={() => { setSelected(v); setShowEdit(true); }}>
+                        <button
+                          className="edit-btn"
+                          onClick={() => {
+                            setSelected(v);
+                            setShowEdit(true);
+                          }}
+                        >
                           <FaEdit />
                         </button>
-                        <button className="delete-btn" onClick={() => deleteVehicle(v._id)}>
+
+                        <button
+                          className="delete-btn"
+                          onClick={() => deleteVehicle(v._id)}
+                        >
                           <FaTrash />
                         </button>
                       </td>
@@ -176,13 +271,29 @@ const AdminVehicles = () => {
                 </tbody>
               </table>
 
-              {/* Simple pager */}
+              {/* Pagination */}
               <div className="pager">
-                <button disabled={page <= 1} onClick={() => { setPage(page - 1); fetchVehicles(page - 1, filters); }}>
+                <button
+                  disabled={page <= 1}
+                  onClick={() => {
+                    setPage(page - 1);
+                    fetchVehicles(page - 1, filters);
+                  }}
+                >
                   Prev
                 </button>
-                <span>{page} / {pages}</span>
-                <button disabled={page >= pages} onClick={() => { setPage(page + 1); fetchVehicles(page + 1, filters); }}>
+
+                <span>
+                  {page} / {pages}
+                </span>
+
+                <button
+                  disabled={page >= pages}
+                  onClick={() => {
+                    setPage(page + 1);
+                    fetchVehicles(page + 1, filters);
+                  }}
+                >
                   Next
                 </button>
               </div>
@@ -191,11 +302,22 @@ const AdminVehicles = () => {
         </div>
       </div>
 
-      {showAdd && <AddVehicleModal onClose={() => setShowAdd(false)} onSuccess={() => fetchVehicles()} />}
+      {showAdd && (
+        <AddVehicleModal
+          onClose={() => setShowAdd(false)}
+          onSuccess={() => fetchVehicles()}
+        />
+      )}
+
       {showEdit && selected && (
-        <EditVehicleModal vehicle={selected} onClose={() => setShowEdit(false)} onSuccess={() => fetchVehicles()} />
+        <EditVehicleModal
+          vehicle={selected}
+          onClose={() => setShowEdit(false)}
+          onSuccess={() => fetchVehicles()}
+        />
       )}
     </div>
   );
 };
+
 export default AdminVehicles;

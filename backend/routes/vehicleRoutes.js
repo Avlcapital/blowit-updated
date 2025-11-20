@@ -1,4 +1,5 @@
 import express from "express";
+import multer from "multer";
 import {
   createVehicle,
   getVehicles,
@@ -6,40 +7,61 @@ import {
   updateVehicle,
   deleteVehicle,
   uploadVehicleImages,
-  importFromBeForward,
   addImagesToVehicle,
   deleteVehicleImage,
   exportVehiclesCSV,
   importVehiclesCSV,
+  importFromBeForward,
   getPublicVehicles,
+  uploadVehicleAuctionSheet,
+  removeVehicleAuctionSheet,
+  uploadVehicleSpinImages,
+  deleteVehicleSpinImage,
 } from "../controllers/vehicleController.js";
-import { protect, adminOnly } from "../middleware/authMiddleware.js";
-import upload from "../middleware/multer.js";
 
 const router = express.Router();
+const upload = multer({ dest: "uploads/" });
 
+// Admin / internal
+router.post("/", createVehicle);
 router.get("/", getVehicles);
 router.get("/:id", getVehicleById);
+router.put("/:id", updateVehicle);
+router.delete("/:id", deleteVehicle);
 
-//admin CRUD
-router.post("/", protect, adminOnly, createVehicle);
-router.put("/:id", protect, adminOnly, updateVehicle);
-router.delete("/:id", protect, adminOnly, deleteVehicle);
+// Main gallery images
+router.post("/upload", upload.array("images"), uploadVehicleImages);
+router.post("/:id/images", upload.array("images"), addImagesToVehicle);
+router.delete("/:id/images/:publicId", deleteVehicleImage);
 
-//Images
-router.post("/upload", protect, adminOnly, upload.array("images"), uploadVehicleImages);
-router.post("/:id/images", protect, adminOnly, upload.array("images"), addImagesToVehicle); 
-router.delete("/:id/images/:publicId", protect, adminOnly, deleteVehicleImage); 
+// Auction sheet
+router.post(
+  "/:id/auction-sheet",
+  upload.single("auctionSheet"),
+  uploadVehicleAuctionSheet
+);
+router.delete("/:id/auction-sheet", removeVehicleAuctionSheet);
 
-//CSV
-router.get("/export/csv", protect, adminOnly, exportVehiclesCSV);
-router.post("/import/csv", protect, adminOnly, upload.single("file"), importVehiclesCSV);
+// 360° spin images
+router.post(
+  "/:id/spin-images",
+  upload.array("spinImages"),
+  uploadVehicleSpinImages
+);
+router.delete("/:id/spin-images/:publicId", deleteVehicleSpinImage);
 
-//Befoward sync
-router.post("/import/beforward", protect, adminOnly, importFromBeForward);
+// CSV
+router.get("/export/csv", exportVehiclesCSV);
+router.post(
+  "/import/csv",
+  upload.single("file"),
+  importVehiclesCSV
+);
 
-// Public browsing route (no auth needed)
-router.get("/public", getPublicVehicles);
+// BeForward sync
+router.post("/import/beforward", importFromBeForward);
 
+// Public list (if you want a separate endpoint like /public)
+router.get("/public/list", getPublicVehicles);
 
 export default router;
