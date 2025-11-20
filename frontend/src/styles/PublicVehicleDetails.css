@@ -1,222 +1,184 @@
-/**********************************
-   PUBLIC VEHICLE DETAILS PAGE
-   Modern Premium Marketplace UI
-**********************************/
-
+/* GENERAL WRAPPER */
+/* GENERAL WRAPPER */
 .pvd-wrapper {
-  max-width: 1300px;
-  margin: 20px auto 60px;
-  padding: 20px;
   display: flex;
-  gap: 40px;
+  gap: 2rem;
+  padding: 2rem;
+  padding-top: 120px !important;  /* ← ADDED FIX */
+  max-width: 1400px;
+  margin: auto;
+  box-sizing: border-box;
 }
 
-@media (max-width: 1024px) {
-  .pvd-wrapper {
-    flex-direction: column;
-  }
-}
-
-/* ------------------------------
-   LEFT: GALLERY
------------------------------- */
+/* LEFT GALLERY */
 .pvd-gallery {
-  flex: 1;
+  width: 45%;
+  position: sticky;
+  top: 90px;
+  align-self: flex-start;
 }
 
 .pvd-main-img {
   width: 100%;
-  height: 440px;
-  border-radius: 12px;
+  height: 380px;
   object-fit: cover;
-  background: #f2f2f2;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
-  transition: 0.25s;
-}
-
-.pvd-main-img:hover {
-  transform: scale(1.01);
-}
-
-@media (max-width: 768px) {
-  .pvd-main-img {
-    height: 300px;
-  }
+  border-radius: 12px;
 }
 
 .pvd-thumbs {
   display: flex;
-  gap: 12px;
-  margin-top: 15px;
+  gap: 0.5rem;
+  margin-top: 1rem;
   overflow-x: auto;
-  padding-bottom: 6px;
 }
 
 .pvd-thumbs img {
-  width: 90px;
-  height: 70px;
-  border-radius: 6px;
+  width: 70px;
+  height: 55px;
   object-fit: cover;
-  border: 2px solid transparent;
+  border-radius: 8px;
   cursor: pointer;
-  transition: 0.25s;
+  opacity: 0.7;
+  border: 2px solid transparent;
 }
 
-.pvd-thumbs img:hover,
 .pvd-thumbs img.active {
+  opacity: 1;
   border-color: #003366;
 }
 
-/* 360 viewer button */
-.pvd-360-btn {
-  margin-top: 20px;
-  padding: 12px 18px;
+/* 360, VIDEO, AUCTION BUTTONS */
+.pvd-360-btn,
+.pvd-video-btn,
+.pvd-auction-btn {
+  margin-top: 1rem;
+  width: 100%;
+  padding: 0.7rem;
+  border-radius: 10px;
   background: #003366;
-  color: white;
-  font-size: 14px;
-  border-radius: 6px;
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  cursor: pointer;
+  color: #fff;
   border: none;
-  transition: 0.25s;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  display: block;
 }
 
-.pvd-360-btn:hover {
-  background: #0055aa;
+.pvd-video-btn {
+  background: #0b3d91;
 }
 
+.pvd-auction-btn {
+  background: #d62828;
+}
 
-/* ------------------------------
-   RIGHT: VEHICLE INFO
------------------------------- */
+/* RIGHT SIDE INFO */
 .pvd-info {
-  flex: 1;
-  background: #ffffff;
-  padding: 30px 32px;
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+  width: 55%;
 }
 
 .pvd-title {
-  font-size: 30px;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 8px;
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
 }
 
 .pvd-price {
-  font-size: 26px;
-  font-weight: 700;
+  font-size: 1.4rem;
   color: #003366;
-  margin-bottom: 25px;
+  margin-bottom: 1rem;
 }
 
-/* SPEC BOX */
-.pvd-specs-box {
-  padding: 22px;
-  background: #f3f7ff;
+/* TABS */
+.pvd-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.pvd-tabs button {
+  background: none;
+  border: none;
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #333;
+  border-radius: 6px;
+  transition: 0.2s;
+}
+
+.pvd-tabs button.active {
+  background: #003366;
+  color: #fff;
+}
+
+/* BOXES */
+.pvd-box {
+  background: #fff;
+  padding: 1.2rem;
   border-radius: 12px;
-  border: 1px solid #d3e0f7;
-  margin-bottom: 25px;
-}
-
-.pvd-specs-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #003366;
-  margin-bottom: 15px;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
 }
 
 .pvd-specs-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 14px 18px;
-  color: #333;
-  font-size: 14px;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
 }
 
-@media (max-width: 600px) {
-  .pvd-specs-grid {
-    grid-template-columns: 1fr;
-  }
+.pvd-features span {
+  display: inline-block;
+  margin: 0.3rem;
+  padding: 0.4rem 0.6rem;
+  background: #eef6ff;
+  border-radius: 6px;
+  font-size: 0.9rem;
 }
 
-.pvd-spec-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+/* MEDIA LIST */
+.media-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
-
-.pvd-spec-item svg {
-  font-size: 16px;
-  color: #003366;
-}
-
-/* Description */
-.pvd-description-box {
-  padding: 20px;
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-}
-
-.pvd-description-box h3 {
-  font-size: 18px;
-  color: #003366;
-  margin-bottom: 10px;
-}
-
-.pvd-description-box p {
-  font-size: 15px;
-  color: #444;
-  line-height: 1.6;
+.media-list li {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #eee;
 }
 
 /* CTA BUTTON */
-.pvd-btn-block {
-  margin-top: 25px;
-  text-align: center;
-}
-
 .pvd-request-btn {
-  padding: 14px 20px;
+  width: 100%;
   background: #003366;
-  width: 90%;
-  border-radius: 10px;
+  color: #fff;
+  padding: 1rem;
+  border-radius: 12px;
+  font-weight: 700;
   border: none;
-  color: white;
   cursor: pointer;
-  font-size: 17px;
-  font-weight: 600;
-  transition: 0.25s;
+  margin-top: 1.2rem;
 }
 
-.pvd-request-btn:hover {
-  background: #0055aa;
-}
-
-
-/* ------------------------------
-   360 MODAL
------------------------------- */
+/* 360° MODAL */
 .pvd-360-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.70);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1200;
+  background: rgba(0,0,0,0.5);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index: 999;
 }
 
 .pvd-360-modal {
-  width: 80%;
-  height: 80%;
+  width: 90%;
+  max-width: 800px;
+  height: 500px;
   background: #000;
-  border-radius: 10px;
-  overflow: hidden;
+  border-radius: 12px;
 }
 
 .pvd-360-modal iframe {
@@ -225,9 +187,13 @@
   border: none;
 }
 
-@media (max-width: 768px) {
-  .pvd-360-modal {
-    width: 95%;
-    height: 70%;
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .pvd-wrapper {
+    flex-direction: column;
+  }
+  .pvd-gallery, .pvd-info {
+    width: 100%;
+    position: static;
   }
 }
