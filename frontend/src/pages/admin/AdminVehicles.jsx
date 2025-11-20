@@ -5,14 +5,7 @@ import AddVehicleModal from "../../components/Admin/AddVehicleModal";
 import EditVehicleModal from "../../components/Admin/EditVehicleModal";
 import api from "../../utils/api";
 import "../../styles/admin/AdminVehicles.css";
-import {
-  FaPlus,
-  FaSyncAlt,
-  FaFileExport,
-  FaFileImport,
-  FaEdit,
-  FaTrash,
-} from "react-icons/fa";
+import { FaPlus, FaSyncAlt, FaFileExport, FaFileImport, FaEdit, FaTrash } from "react-icons/fa";
 import { BASE_URL } from "../../utils/config";
 
 const AdminVehicles = () => {
@@ -26,29 +19,21 @@ const AdminVehicles = () => {
   const [showEdit, setShowEdit] = useState(false);
 
   const [filters, setFilters] = useState({
-    q: "",
     brand: "",
     model: "",
     year: "",
     status: "",
+    q: ""
   });
 
   const csvInputRef = useRef(null);
-
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   const fetchVehicles = async (p = page, f = filters) => {
     try {
       setLoading(true);
-
-      const params = new URLSearchParams({
-        page: p,
-        limit: 20,
-        ...f,
-      });
-
+      const params = new URLSearchParams({ page: p, limit: 20, ...f });
       const res = await api.get(`${BASE_URL}/api/vehicles?${params.toString()}`);
-
       if (res.data.success) {
         setVehicles(res.data.vehicles);
         setPages(res.data.pages);
@@ -73,7 +58,7 @@ const AdminVehicles = () => {
   const applyFilters = () => fetchVehicles(1, filters);
 
   const resetFilters = () => {
-    const f = { q: "", brand: "", model: "", year: "", status: "" };
+    const f = { brand: "", model: "", year: "", status: "", q: "" };
     setFilters(f);
     fetchVehicles(1, f);
   };
@@ -91,6 +76,7 @@ const AdminVehicles = () => {
   const importCSV = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     const fd = new FormData();
     fd.append("file", file);
 
@@ -124,6 +110,8 @@ const AdminVehicles = () => {
         <AdminNavbar toggleSidebar={toggleSidebar} />
 
         <div className="admin-content">
+
+          {/* Header */}
           <div className="vehicles-header">
             <h2>Vehicles</h2>
 
@@ -131,9 +119,11 @@ const AdminVehicles = () => {
               <button className="btn add" onClick={() => setShowAdd(true)}>
                 <FaPlus /> Add
               </button>
+
               <button className="btn" onClick={exportCSV}>
                 <FaFileExport /> Export CSV
               </button>
+
               <button className="btn" onClick={() => csvInputRef.current?.click()}>
                 <FaFileImport /> Import CSV
               </button>
@@ -147,7 +137,7 @@ const AdminVehicles = () => {
               />
 
               <button className="btn import" onClick={syncBeForward}>
-                <FaSyncAlt /> Sync BeForward
+                <FaSyncAlt /> Sync Be Forward
               </button>
             </div>
           </div>
@@ -156,7 +146,7 @@ const AdminVehicles = () => {
           <div className="vehicle-filters">
             <input
               name="q"
-              placeholder="Search..."
+              placeholder="Search title/model..."
               value={filters.q}
               onChange={handleFilterChange}
             />
@@ -184,7 +174,7 @@ const AdminVehicles = () => {
               value={filters.status}
               onChange={handleFilterChange}
             >
-              <option value="">All Status</option>
+              <option value="">All status</option>
               <option>Available</option>
               <option>Pending</option>
               <option>Sold</option>
@@ -202,71 +192,116 @@ const AdminVehicles = () => {
           {loading ? (
             <p>Loading...</p>
           ) : (
-            <div className="table-container">
+            <div className="table-wrap">
               <table className="vehicle-table">
                 <thead>
                   <tr>
                     <th>Image</th>
                     <th>Title</th>
-                    <th>Brand</th>
-                    <th>Model</th>
-                    <th>Year</th>
-                    <th>Mileage</th>
-                    <th>Transmission</th>
-                    <th>Fuel</th>
+                    <th>Specs</th>
                     <th>Price</th>
                     <th>Status</th>
-                    <th className="actions-col">Actions</th>
+                    <th>Media</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {vehicles.map((v) => (
                     <tr key={v._id}>
-                      <td>
-                        <img
-                          src={v.images?.[0]?.url || "/placeholder-car.jpg"}
-                          alt=""
-                          className="tbl-thumb"
-                        />
-                      </td>
+  {/* Thumbnail */}
+  <td>
+    <img
+      src={v.images?.[0]?.url || "/placeholder-car.jpg"}
+      alt=""
+      className="tbl-thumb"
+    />
+  </td>
 
-                      <td className="td-title">{v.title}</td>
-                      <td>{v.brand}</td>
-                      <td>{v.model}</td>
-                      <td>{v.year}</td>
+  {/* Title (ONLY title now) */}
+  <td>
+    <strong>{v.title}</strong>
+  </td>
 
-                      <td>{v.mileage?.toLocaleString()}</td>
-                      <td>{v.transmission}</td>
-                      <td>{v.fuelType}</td>
+  {/* FULL SPECS COLUMN */}
+  <td className="specs-cell">
 
-                      <td>KES {Number(v.price || 0).toLocaleString()}</td>
+    {/* BRAND | MODEL | STOCK */}
+    <div className="spec-line"><strong>Brand:</strong> {v.brand}</div>
+    <div className="spec-line"><strong>Model:</strong> {v.model}</div>
+    <div className="spec-line"><strong>Stock:</strong> {v.stockNumber || "N/A"}</div>
 
-                      <td>
-                        <span className={`status ${v.status?.toLowerCase()}`}>
-                          {v.status}
-                        </span>
-                      </td>
+    {/* LOCATION & CONDITION */}
+    <div className="spec-line"><strong>Location:</strong> {v.location || "Japan"}</div>
+    <div className="spec-line"><strong>Condition:</strong> {v.condition}</div>
 
-                      <td className="row-actions">
-                        <button
-                          className="edit-btn"
-                          onClick={() => {
-                            setSelected(v);
-                            setShowEdit(true);
-                          }}
-                        >
-                          <FaEdit />
-                        </button>
+    {/* MAIN VEHICLE INFO */}
+    <div className="spec-line"><strong>Year:</strong> {v.year}</div>
+    <div className="spec-line"><strong>Mileage:</strong> {v.mileage?.toLocaleString()} km</div>
+    <div className="spec-line"><strong>Engine:</strong> {v.engineCapacity || "N/A"}</div>
+    <div className="spec-line"><strong>Fuel:</strong> {v.fuelType}</div>
+    <div className="spec-line"><strong>Trans:</strong> {v.transmission}</div>
+    <div className="spec-line"><strong>Drive:</strong> {v.driveType || "2WD"}</div>
+    <div className="spec-line"><strong>Seats:</strong> {v.seats || "N/A"}</div>
 
-                        <button
-                          className="delete-btn"
-                          onClick={() => deleteVehicle(v._id)}
-                        >
-                          <FaTrash />
-                        </button>
-                      </td>
-                    </tr>
+  </td>
+
+  {/* Price ONLY */}
+  <td>
+    <strong>KES {Number(v.price || 0).toLocaleString()}</strong>
+  </td>
+
+  {/* Status */}
+  <td>
+    <span className={`status ${v.status?.toLowerCase()}`}>{v.status}</span>
+  </td>
+
+  {/* Media */}
+  <td>
+    <div className="media-flags">
+
+      {v.auctionSheetUrl ? (
+        <span className="flag green">AS</span>
+      ) : (
+        <span className="flag grey">AS</span>
+      )}
+
+      {v.spinImages?.length > 0 ? (
+        <span className="flag blue">360°</span>
+      ) : (
+        <span className="flag grey">360°</span>
+      )}
+
+      <div className="tech-icons">
+        {v.bluetooth && <span className="ti">BT</span>}
+        {v.navigation && <span className="ti">NAV</span>}
+        {v.reverseCamera && <span className="ti">CAM</span>}
+        {v.hasScreen && <span className="ti">SCR</span>}
+      </div>
+
+    </div>
+  </td>
+
+  {/* Actions */}
+  <td className="row-actions">
+    <button
+      className="edit-btn"
+      onClick={() => {
+        setSelected(v);
+        setShowEdit(true);
+      }}
+    >
+      <FaEdit />
+    </button>
+
+    <button
+      className="delete-btn"
+      onClick={() => deleteVehicle(v._id)}
+    >
+      <FaTrash />
+    </button>
+  </td>
+</tr>
                   ))}
                 </tbody>
               </table>
@@ -282,11 +317,7 @@ const AdminVehicles = () => {
                 >
                   Prev
                 </button>
-
-                <span>
-                  {page} / {pages}
-                </span>
-
+                <span>{page} / {pages}</span>
                 <button
                   disabled={page >= pages}
                   onClick={() => {
