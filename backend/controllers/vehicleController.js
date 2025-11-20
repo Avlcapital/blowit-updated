@@ -1,3 +1,4 @@
+// backend/controllers/vehicleController.js
 import Vehicle from "../models/Vehicle.js";
 import cloudinary from "../config/cloudinary.js";
 import fs from "fs";
@@ -16,8 +17,7 @@ export const createVehicle = async (req, res) => {
   }
 };
 
-/* LIST + FILTER + PAGINATE */
-/* LIST + FILTER + PAGINATE */
+/* LIST + FILTER + PAGINATE (ADMIN) */
 export const getVehicles = async (req, res) => {
   try {
     const {
@@ -29,7 +29,7 @@ export const getVehicles = async (req, res) => {
       maxPrice,
       page = 1,
       limit = 20,
-      q, 
+      q,
     } = req.query;
 
     const query = {};
@@ -39,14 +39,12 @@ export const getVehicles = async (req, res) => {
     if (year && year.trim() !== "") query.year = Number(year);
     if (status && status.trim() !== "") query.status = status.trim();
 
-    // price range only applied if values exist
     if (minPrice || maxPrice) {
       query.price = {};
       if (minPrice) query.price.$gte = Number(minPrice);
       if (maxPrice) query.price.$lte = Number(maxPrice);
     }
 
-    // free text search
     if (q && q.trim() !== "") {
       query.$or = [
         { title: new RegExp(q.trim(), "i") },
@@ -72,7 +70,6 @@ export const getVehicles = async (req, res) => {
       page: Number(page),
       pages: Math.ceil(total / Number(limit)),
     });
-
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -82,7 +79,10 @@ export const getVehicles = async (req, res) => {
 export const getVehicleById = async (req, res) => {
   try {
     const vehicle = await Vehicle.findById(req.params.id);
-    if (!vehicle) return res.status(404).json({ success: false, message: "Vehicle not found" });
+    if (!vehicle)
+      return res
+        .status(404)
+        .json({ success: false, message: "Vehicle not found" });
     res.json({ success: true, vehicle });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -92,7 +92,11 @@ export const getVehicleById = async (req, res) => {
 /* UPDATE */
 export const updateVehicle = async (req, res) => {
   try {
-    const updated = await Vehicle.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updated = await Vehicle.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
     res.json({ success: true, vehicle: updated });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -103,12 +107,26 @@ export const updateVehicle = async (req, res) => {
 export const deleteVehicle = async (req, res) => {
   try {
     const v = await Vehicle.findById(req.params.id);
-    if (!v) return res.status(404).json({ success: false, message: "Vehicle not found" });
+    if (!v)
+      return res
+        .status(404)
+        .json({ success: false, message: "Vehicle not found" });
 
-    // optional: cleanup cloudinary images
+    // cleanup images
     for (const img of v.images || []) {
       if (img.public_id) await cloudinary.uploader.destroy(img.public_id);
     }
+
+    // cleanup spin images
+    for (const img of v.spinImages || []) {
+      if (img.public_id) await cloudinary.uploader.destroy(img.public_id);
+    }
+
+    // cleanup auction sheet
+    if (v.auctionSheetPublicId) {
+      await cloudinary.uploader.destroy(v.auctionSheetPublicId);
+    }
+
     await v.deleteOne();
     res.json({ success: true, message: "Vehicle deleted" });
   } catch (err) {
@@ -116,13 +134,19 @@ export const deleteVehicle = async (req, res) => {
   }
 };
 
-/* IMAGE: BULK UPLOAD (returns cloudinary list) */
+/* IMAGE: BULK UPLOAD (main gallery) */
 export const uploadVehicleImages = async (req, res) => {
   try {
-    if (!req.files?.length) return res.status(400).json({ success: false, message: "No files" });
+    if (!req.files?.length)
+      return res
+        .status(400)
+        .json({ success: false, message: "No files uploaded" });
+
     const uploaded = [];
     for (const file of req.files) {
-      const r = await cloudinary.uploader.upload(file.path, { folder: "blowit/vehicles" });
+      const r = await cloudinary.uploader.upload(file.path, {
+        folder: "blowit/vehicles",
+      });
       uploaded.push({ url: r.secure_url, public_id: r.public_id });
       fs.unlinkSync(file.path);
     }
@@ -138,11 +162,16 @@ export const addImagesToVehicle = async (req, res) => {
   try {
     const { id } = req.params;
     const v = await Vehicle.findById(id);
-    if (!v) return res.status(404).json({ success: false, message: "Vehicle not found" });
+    if (!v)
+      return res
+        .status(404)
+        .json({ success: false, message: "Vehicle not found" });
 
     const uploaded = [];
     for (const file of req.files) {
-      const r = await cloudinary.uploader.upload(file.path, { folder: "blowit/vehicles" });
+      const r = await cloudinary.uploader.upload(file.path, {
+        folder: "blowit/vehicles",
+      });
       uploaded.push({ url: r.secure_url, public_id: r.public_id });
       fs.unlinkSync(file.path);
     }
@@ -155,17 +184,17 @@ export const addImagesToVehicle = async (req, res) => {
   }
 };
 
-/* IMAGE: DELETE single image by public_id */
+/* IMAGE: DELETE single image by public_id (main gallery) */
 export const deleteVehicleImage = async (req, res) => {
   try {
     const { id, publicId } = req.params;
     const v = await Vehicle.findById(id);
-    if (!v) return res.status(404).json({ success: false, message: "Vehicle not found" });
+    if (!v)
+      return res
+        .status(404)
+        .json({ success: false, message: "Vehicle not found" });
 
-    // remove from cloudinary
     await cloudinary.uploader.destroy(publicId);
-
-    // remove from array
     v.images = (v.images || []).filter((img) => img.public_id !== publicId);
     await v.save();
 
@@ -175,13 +204,149 @@ export const deleteVehicleImage = async (req, res) => {
   }
 };
 
+/* === NEW: UPLOAD AUCTION SHEET (single image/PDF) === */
+export const uploadVehicleAuctionSheet = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const v = await Vehicle.findById(id);
+    if (!v)
+      return res
+        .status(404)
+        .json({ success: false, message: "Vehicle not found" });
+
+    if (!req.file)
+      return res
+        .status(400)
+        .json({ success: false, message: "No file uploaded" });
+
+    // delete old auction sheet if exists
+    if (v.auctionSheetPublicId) {
+      await cloudinary.uploader.destroy(v.auctionSheetPublicId);
+    }
+
+    const r = await cloudinary.uploader.upload(req.file.path, {
+      folder: "blowit/vehicles/auction-sheets",
+      resource_type: "auto",
+    });
+    fs.unlinkSync(req.file.path);
+
+    v.auctionSheetUrl = r.secure_url;
+    v.auctionSheetPublicId = r.public_id;
+    await v.save();
+
+    res.json({
+      success: true,
+      auctionSheetUrl: v.auctionSheetUrl,
+      auctionSheetPublicId: v.auctionSheetPublicId,
+    });
+  } catch (err) {
+    console.error("Auction sheet upload error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const removeVehicleAuctionSheet = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const v = await Vehicle.findById(id);
+    if (!v)
+      return res
+        .status(404)
+        .json({ success: false, message: "Vehicle not found" });
+
+    if (v.auctionSheetPublicId) {
+      await cloudinary.uploader.destroy(v.auctionSheetPublicId);
+    }
+
+    v.auctionSheetUrl = undefined;
+    v.auctionSheetPublicId = undefined;
+    await v.save();
+
+    res.json({ success: true, message: "Auction sheet removed" });
+  } catch (err) {
+    console.error("Remove auction sheet error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/* === NEW: SPIN IMAGES (360°) === */
+export const uploadVehicleSpinImages = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const v = await Vehicle.findById(id);
+    if (!v)
+      return res
+        .status(404)
+        .json({ success: false, message: "Vehicle not found" });
+
+    if (!req.files?.length)
+      return res
+        .status(400)
+        .json({ success: false, message: "No files uploaded" });
+
+    const uploaded = [];
+    for (const file of req.files) {
+      const r = await cloudinary.uploader.upload(file.path, {
+        folder: "blowit/vehicles/360-spin",
+      });
+      uploaded.push({ url: r.secure_url, public_id: r.public_id });
+      fs.unlinkSync(file.path);
+    }
+
+    v.spinImages = [...(v.spinImages || []), ...uploaded];
+    await v.save();
+
+    res.json({ success: true, spinImages: v.spinImages });
+  } catch (err) {
+    console.error("Spin images upload error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const deleteVehicleSpinImage = async (req, res) => {
+  try {
+    const { id, publicId } = req.params;
+    const v = await Vehicle.findById(id);
+    if (!v)
+      return res
+        .status(404)
+        .json({ success: false, message: "Vehicle not found" });
+
+    await cloudinary.uploader.destroy(publicId);
+    v.spinImages = (v.spinImages || []).filter(
+      (img) => img.public_id !== publicId
+    );
+    await v.save();
+
+    res.json({ success: true, spinImages: v.spinImages });
+  } catch (err) {
+    console.error("Delete spin image error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 /* EXPORT CSV */
 export const exportVehiclesCSV = async (req, res) => {
   try {
     const vehicles = await Vehicle.find({}).lean();
     const fields = [
-      "title","brand","model","year","mileage","transmission","fuelType","engineCapacity","color","condition",
-      "price","status","stockNumber","location","source","beForwardId","createdAt"
+      "title",
+      "brand",
+      "model",
+      "year",
+      "mileage",
+      "transmission",
+      "fuelType",
+      "engineCapacity",
+      "color",
+      "condition",
+      "price",
+      "status",
+      "stockNumber",
+      "location",
+      "source",
+      "beForwardId",
+      "createdAt",
     ];
     const parser = new Json2CsvParser({ fields });
     const csvData = parser.parse(vehicles);
@@ -194,17 +359,21 @@ export const exportVehiclesCSV = async (req, res) => {
   }
 };
 
-/* IMPORT CSV (bulk upsert by stockNumber if present) */
+/* IMPORT CSV (bulk upsert) */
 export const importVehiclesCSV = async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ success: false, message: "CSV file required" });
+    if (!req.file)
+      return res
+        .status(400)
+        .json({ success: false, message: "CSV file required" });
 
     const results = [];
     fs.createReadStream(req.file.path)
       .pipe(csv())
       .on("data", (row) => results.push(row))
       .on("end", async () => {
-        let created = 0, updated = 0;
+        let created = 0,
+          updated = 0;
         for (const r of results) {
           const payload = {
             title: r.title,
@@ -226,8 +395,13 @@ export const importVehiclesCSV = async (req, res) => {
           };
 
           if (payload.stockNumber) {
-            const u = await Vehicle.findOneAndUpdate({ stockNumber: payload.stockNumber }, payload, { upsert: true, new: false });
-            if (u) updated++; else created++;
+            const u = await Vehicle.findOneAndUpdate(
+              { stockNumber: payload.stockNumber },
+              payload,
+              { upsert: true, new: false }
+            );
+            if (u) updated++;
+            else created++;
           } else {
             await Vehicle.create(payload);
             created++;
@@ -244,13 +418,17 @@ export const importVehiclesCSV = async (req, res) => {
 
 export const importFromBeForward = async (req, res) => {
   try {
-    await beforwardQueue.add({ feedUrl: process.env.BEFORWARD_FEED_URL }, { attempts: 3, backoff: 60000 });
+    await beforwardQueue.add(
+      { feedUrl: process.env.BEFORWARD_FEED_URL },
+      { attempts: 3, backoff: 60000 }
+    );
     res.json({ success: true, message: "Be Forward sync queued." });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 };
 
+/* PUBLIC LIST (used by Landing page + PublicVehicles) */
 export const getPublicVehicles = async (req, res) => {
   try {
     const {
@@ -270,47 +448,45 @@ export const getPublicVehicles = async (req, res) => {
 
     const filter = {};
 
-    // SEARCH TEXT
+    // Only show "Available" to public
+    filter.status = "Available";
+
     if (q.trim() !== "") {
       filter.$or = [
         { title: { $regex: q.trim(), $options: "i" } },
         { model: { $regex: q.trim(), $options: "i" } },
-        { brand: { $regex: q.trim(), $options: "i" } }
+        { brand: { $regex: q.trim(), $options: "i" } },
       ];
     }
 
     if (brand.trim() !== "") filter.brand = brand.trim();
     if (model.trim() !== "") filter.model = model.trim();
-    if (transmission.trim() !== "") filter.transmission = transmission.trim();
+    if (transmission.trim() !== "")
+      filter.transmission = transmission.trim();
     if (fuelType.trim() !== "") filter.fuelType = fuelType.trim();
 
-    // YEAR RANGE
     if (minYear || maxYear) {
       filter.year = {};
       if (minYear) filter.year.$gte = Number(minYear);
       if (maxYear) filter.year.$lte = Number(maxYear);
     }
 
-    // PRICE RANGE
     if (minPrice || maxPrice) {
       filter.price = {};
       if (minPrice) filter.price.$gte = Number(minPrice);
       if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
 
-    // SORT MAP
     const sortMap = {
       latest: { createdAt: -1 },
       oldest: { createdAt: 1 },
       price_low: { price: 1 },
       price_high: { price: -1 },
       mileage_low: { mileage: 1 },
-      mileage_high: { mileage: -1 }
+      mileage_high: { mileage: -1 },
     };
-
     const sorting = sortMap[sort] || sortMap.latest;
 
-    // QUERY
     const total = await Vehicle.countDocuments(filter);
 
     const vehicles = await Vehicle.find(filter)
@@ -325,99 +501,8 @@ export const getPublicVehicles = async (req, res) => {
       pages: Math.ceil(total / Number(limit)),
       total,
     });
-
   } catch (err) {
     console.error("PUBLIC VEHICLES ERROR:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 };
-
-
-// export const getPublicVehicles = async (req, res) => {
-//   try {
-//     const {
-//       page = 1,
-//       limit = 20,
-//       q,
-//       brand,
-//       model,
-//       year,
-//       minYear,
-//       maxYear,
-//       minPrice,
-//       maxPrice,
-//       priceRange,
-//       sort = "latest",
-//     } = req.query;
-
-//     const filter = {};
-
-//     /* ----------------- TEXT SEARCH ----------------- */
-//     if (q) {
-//       filter.$or = [
-//         { title: { $regex: q, $options: "i" } },
-//         { brand: { $regex: q, $options: "i" } },
-//         { model: { $regex: q, $options: "i" } },
-//       ];
-//     }
-
-//     /* ----------------- BRAND & MODEL ----------------- */
-//     if (brand) filter.brand = new RegExp(brand, "i");
-//     if (model) filter.model = new RegExp(model, "i");
-
-//     /* ----------------- YEAR FILTERS ----------------- */
-//     if (year) filter.year = Number(year);
-
-//     if (minYear || maxYear) {
-//       filter.year = {};
-//       if (minYear) filter.year.$gte = Number(minYear);
-//       if (maxYear) filter.year.$lte = Number(maxYear);
-//     }
-
-//     /* ----------------- PRICE ----------------- */
-//     if (priceRange) {
-//       const [minP, maxP] = priceRange.split("-");
-//       filter.price = { $gte: Number(minP), $lte: Number(maxP) };
-//     }
-
-//     if (minPrice || maxPrice) {
-//       filter.price = {};
-//       if (minPrice) filter.price.$gte = Number(minPrice);
-//       if (maxPrice) filter.price.$lte = Number(maxPrice);
-//     }
-
-//     /* ----------------- SORTING ----------------- */
-//     const sortMap = {
-//       latest: { createdAt: -1 },
-//       oldest: { createdAt: 1 },
-//       price_low: { price: 1 },
-//       price_high: { price: -1 },
-//       mileage_low: { mileage: 1 },
-//       mileage_high: { mileage: -1 },
-//     };
-
-//     const sorting = sortMap[sort] || sortMap.latest;
-
-//     /* ----------------- PAGINATION ----------------- */
-//     const skip = (Number(page) - 1) * Number(limit);
-
-//     const [vehicles, total] = await Promise.all([
-//       Vehicle.find(filter)
-//         .sort(sorting)
-//         .skip(skip)
-//         .limit(Number(limit)),
-//       Vehicle.countDocuments(filter),
-//     ]);
-
-//     res.json({
-//       success: true,
-//       vehicles,
-//       total,
-//       pages: Math.ceil(total / limit),
-//       page: Number(page),
-//     });
-//   } catch (err) {
-//     res.status(500).json({ success: false, message: err.message });
-//   }
-// };
-
