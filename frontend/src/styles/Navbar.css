@@ -110,6 +110,7 @@
 @media (max-width: 900px) {
   .menu-toggle {
     display: block;
+    color: black;
   }
 
   .nav-links {
