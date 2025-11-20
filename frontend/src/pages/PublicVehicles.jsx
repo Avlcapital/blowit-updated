@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Slider from "react-slick";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import {
   FaSearch,
@@ -13,10 +13,11 @@ import {
 
 import api from "../utils/api";
 import { BASE_URL } from "../utils/config";
-
 import "../styles/PublicVehicles.css";
 
 const PublicVehicles = () => {
+  const navigate = useNavigate();
+
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -33,6 +34,7 @@ const PublicVehicles = () => {
     sort: "latest",
   });
 
+  // ----------------------- Fetch Public Vehicles -----------------------
   const fetchVehicles = async (overridePage) => {
     try {
       setLoading(true);
@@ -62,6 +64,7 @@ const PublicVehicles = () => {
     fetchVehicles(1);
   }, []);
 
+  // ----------------------- Slider Settings -----------------------
   const sliderSettings = {
     dots: true,
     infinite: true,
@@ -72,11 +75,26 @@ const PublicVehicles = () => {
     pauseOnHover: true,
   };
 
+  // ----------------------- Auth Check -----------------------
+  const handleRequestImport = (vehicleId) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      // redirect to login with redirect back
+      navigate(`/login?redirect=/customer/vehicle/${vehicleId}#request`);
+      return;
+    }
+
+    // logged-in customer → go to customer page
+    navigate(`/customer/vehicle/${vehicleId}#request`);
+  };
+
   return (
     <div className="pv-wrapper">
+      {/* ================= HEADER ================= */}
       <div className="pv-header">
         <h1>Available Vehicles</h1>
-        <p>Browse all cars imported directly from Japan.</p>
+        <p>Browse all vehicles imported directly from Japan.</p>
 
         <div className="pv-search">
           <FaSearch />
@@ -90,7 +108,7 @@ const PublicVehicles = () => {
         </div>
       </div>
 
-      {/* Filters */}
+      {/* ================= FILTERS ================= */}
       <div className="pv-filters">
         <input
           placeholder="Brand"
@@ -114,12 +132,14 @@ const PublicVehicles = () => {
           value={filters.maxYear}
           onChange={(e) => setFilters((p) => ({ ...p, maxYear: e.target.value }))}
         />
+
         <input
           type="number"
           placeholder="Min Price"
           value={filters.minPrice}
           onChange={(e) => setFilters((p) => ({ ...p, minPrice: e.target.value }))}
         />
+
         <input
           type="number"
           placeholder="Max Price"
@@ -140,6 +160,7 @@ const PublicVehicles = () => {
         </select>
 
         <button className="pv-btn" onClick={() => fetchVehicles(1)}>Apply</button>
+
         <button
           className="pv-btn ghost"
           onClick={() => {
@@ -160,7 +181,7 @@ const PublicVehicles = () => {
         </button>
       </div>
 
-      {/* Vehicles List */}
+      {/* ================= VEHICLE GRID ================= */}
       {loading ? (
         <p className="pv-loading">Loading vehicles...</p>
       ) : vehicles.length === 0 ? (
@@ -169,6 +190,7 @@ const PublicVehicles = () => {
         <div className="pv-grid">
           {vehicles.map((v) => {
             const mainImg = v.images?.[0]?.url || "/placeholder-car.jpg";
+
             return (
               <div className="pv-card" key={v._id}>
                 <div className="pv-media">
@@ -191,7 +213,7 @@ const PublicVehicles = () => {
                   {(v.has360 || v.model3dUrl) && (
                     <button
                       className="pv-360-btn"
-                      onClick={() => (window.location.href = `/customer/vehicle/${v._id}`)}
+                      onClick={() => navigate(`/vehicle/${v._id}`)}
                     >
                       <FaPlayCircle /> 360° View
                     </button>
@@ -202,31 +224,27 @@ const PublicVehicles = () => {
                   <h3>{v.title || `${v.brand} ${v.model}`}</h3>
 
                   <div className="pv-specs">
-                    {v.year && (
-                      <span><FaStopwatch /> {v.year}</span>
-                    )}
-                    {v.mileage && (
-                      <span><FaCarSide /> {v.mileage.toLocaleString()} km</span>
-                    )}
-                    {v.fuelType && (
-                      <span><FaGasPump /> {v.fuelType}</span>
-                    )}
+                    {v.year && <span><FaStopwatch /> {v.year}</span>}
+                    {v.mileage && <span><FaCarSide /> {v.mileage.toLocaleString()} km</span>}
+                    {v.fuelType && <span><FaGasPump /> {v.fuelType}</span>}
                   </div>
 
                   <div className="pv-actions">
-                    <Link
-                      to={`/customer/vehicle/${v._id}`}
+                    {/* PUBLIC VIEW DETAILS (NO LOGIN REQUIRED) */}
+                    <button
                       className="pv-details-btn"
+                      onClick={() => navigate(`/vehicle/${v._id}`)}
                     >
                       View Details
-                    </Link>
+                    </button>
 
-                    <Link
-                      to={`/customer/vehicle/${v._id}`}
+                    {/* REQUEST IMPORT (LOGIN REQUIRED) */}
+                    <button
                       className="pv-request-btn"
+                      onClick={() => handleRequestImport(v._id)}
                     >
                       Request Import
-                    </Link>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -235,13 +253,17 @@ const PublicVehicles = () => {
         </div>
       )}
 
-      {/* Pagination */}
+      {/* ================= PAGINATION ================= */}
       {!loading && pages > 1 && (
         <div className="pv-pagination">
           <button disabled={page <= 1} onClick={() => fetchVehicles(page - 1)}>
             Prev
           </button>
-          <span>Page {page} / {pages}</span>
+
+          <span>
+            Page {page} / {pages}
+          </span>
+
           <button disabled={page >= pages} onClick={() => fetchVehicles(page + 1)}>
             Next
           </button>

@@ -1,0 +1,233 @@
+/**********************************
+   PUBLIC VEHICLE DETAILS PAGE
+   Modern Premium Marketplace UI
+**********************************/
+
+.pvd-wrapper {
+  max-width: 1300px;
+  margin: 20px auto 60px;
+  padding: 20px;
+  display: flex;
+  gap: 40px;
+}
+
+@media (max-width: 1024px) {
+  .pvd-wrapper {
+    flex-direction: column;
+  }
+}
+
+/* ------------------------------
+   LEFT: GALLERY
+------------------------------ */
+.pvd-gallery {
+  flex: 1;
+}
+
+.pvd-main-img {
+  width: 100%;
+  height: 440px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: #f2f2f2;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+  transition: 0.25s;
+}
+
+.pvd-main-img:hover {
+  transform: scale(1.01);
+}
+
+@media (max-width: 768px) {
+  .pvd-main-img {
+    height: 300px;
+  }
+}
+
+.pvd-thumbs {
+  display: flex;
+  gap: 12px;
+  margin-top: 15px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+
+.pvd-thumbs img {
+  width: 90px;
+  height: 70px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.pvd-thumbs img:hover,
+.pvd-thumbs img.active {
+  border-color: #003366;
+}
+
+/* 360 viewer button */
+.pvd-360-btn {
+  margin-top: 20px;
+  padding: 12px 18px;
+  background: #003366;
+  color: white;
+  font-size: 14px;
+  border-radius: 6px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+  transition: 0.25s;
+}
+
+.pvd-360-btn:hover {
+  background: #0055aa;
+}
+
+
+/* ------------------------------
+   RIGHT: VEHICLE INFO
+------------------------------ */
+.pvd-info {
+  flex: 1;
+  background: #ffffff;
+  padding: 30px 32px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+}
+
+.pvd-title {
+  font-size: 30px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.pvd-price {
+  font-size: 26px;
+  font-weight: 700;
+  color: #003366;
+  margin-bottom: 25px;
+}
+
+/* SPEC BOX */
+.pvd-specs-box {
+  padding: 22px;
+  background: #f3f7ff;
+  border-radius: 12px;
+  border: 1px solid #d3e0f7;
+  margin-bottom: 25px;
+}
+
+.pvd-specs-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #003366;
+  margin-bottom: 15px;
+}
+
+.pvd-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 18px;
+  color: #333;
+  font-size: 14px;
+}
+
+@media (max-width: 600px) {
+  .pvd-specs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pvd-spec-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pvd-spec-item svg {
+  font-size: 16px;
+  color: #003366;
+}
+
+/* Description */
+.pvd-description-box {
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+}
+
+.pvd-description-box h3 {
+  font-size: 18px;
+  color: #003366;
+  margin-bottom: 10px;
+}
+
+.pvd-description-box p {
+  font-size: 15px;
+  color: #444;
+  line-height: 1.6;
+}
+
+/* CTA BUTTON */
+.pvd-btn-block {
+  margin-top: 25px;
+  text-align: center;
+}
+
+.pvd-request-btn {
+  padding: 14px 20px;
+  background: #003366;
+  width: 90%;
+  border-radius: 10px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 17px;
+  font-weight: 600;
+  transition: 0.25s;
+}
+
+.pvd-request-btn:hover {
+  background: #0055aa;
+}
+
+
+/* ------------------------------
+   360 MODAL
+------------------------------ */
+.pvd-360-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.70);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1200;
+}
+
+.pvd-360-modal {
+  width: 80%;
+  height: 80%;
+  background: #000;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.pvd-360-modal iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+@media (max-width: 768px) {
+  .pvd-360-modal {
+    width: 95%;
+    height: 70%;
+  }
+}
