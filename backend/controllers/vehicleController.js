@@ -359,21 +359,23 @@ export const exportVehiclesCSV = async (req, res) => {
   }
 };
 
-/* IMPORT CSV (bulk upsert) */
+/* IMPORT CSV (bulk upsert with images) */
 export const importVehiclesCSV = async (req, res) => {
   try {
     if (!req.file)
-      return res
-        .status(400)
-        .json({ success: false, message: "CSV file required" });
+      return res.status(400).json({
+        success: false,
+        message: "CSV file required",
+      });
 
     const results = [];
     fs.createReadStream(req.file.path)
       .pipe(csv())
       .on("data", (row) => results.push(row))
       .on("end", async () => {
-        let created = 0,
-          updated = 0;
+        let created = 0;
+        let updated = 0;
+
         for (const r of results) {
           const payload = {
             title: r.title,
@@ -392,8 +394,26 @@ export const importVehiclesCSV = async (req, res) => {
             location: r.location || "Japan",
             source: r.source || "local",
             beForwardId: r.beForwardId || undefined,
+
+            // FIXED IMAGE KEYS
+            images: [
+              r.image1 && { url: r.image1 },
+              r.image2 && { url: r.image2 },
+              r.image3 && { url: r.image3 },
+              r.image4 && { url: r.image4 },
+              r.image5 && { url: r.image5 },
+            ].filter(Boolean),
+
+            // FIXED SPIN IMAGE KEY
+            spinImages: [
+              r.spinImage && { url: r.spinImage },
+            ].filter(Boolean),
+
+            // Auction sheet
+            auctionSheetUrl: r.auctionSheetUrl || undefined,
           };
 
+          // UPSERT USING stockNumber
           if (payload.stockNumber) {
             const u = await Vehicle.findOneAndUpdate(
               { stockNumber: payload.stockNumber },
@@ -407,14 +427,24 @@ export const importVehiclesCSV = async (req, res) => {
             created++;
           }
         }
+
         fs.unlinkSync(req.file.path);
-        res.json({ success: true, message: "CSV processed", created, updated });
+
+        res.json({
+          success: true,
+          message: "CSV processed",
+          created,
+          updated,
+        });
       });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+
+
 
 export const importFromBeForward = async (req, res) => {
   try {
