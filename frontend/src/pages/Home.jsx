@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
-import Layout from "../components/Layout.jsx";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaArrowRight } from "react-icons/fa";
+
+import Layout from "../components/Layout.jsx";
 import api from "../utils/api";
 import { BASE_URL } from "../utils/config";
 
@@ -9,14 +10,14 @@ import "../styles/Home.css";
 
 const Home = () => {
   const navigate = useNavigate();
-  const [trending, setTrending] = useState([]);
 
-  /* ------------------- Fetch trending ------------------- */
+  const [trending, setTrending] = useState([]);
+  const [search, setSearch] = useState("");
+
+  /* ------------------- Fetch trending vehicles ------------------- */
   const loadTrending = async () => {
     try {
-      const res = await api.get(
-        `${BASE_URL}/api/vehicles?limit=4&sort=latest`
-      );
+      const res = await api.get(`${BASE_URL}/api/vehicles?limit=4&sort=latest`);
       if (res.data.success) {
         setTrending(res.data.vehicles);
       }
@@ -29,17 +30,26 @@ const Home = () => {
     loadTrending();
   }, []);
 
-  /* ------------------- Hero search ------------------- */
-  const [search, setSearch] = useState("");
-
+  /* ------------------- Hero search handler ------------------- */
   const handleSearch = () => {
     if (!search.trim()) return;
     navigate(`/vehicles?q=${encodeURIComponent(search)}`);
   };
 
-  /* ------------------- Categories ------------------- */
+  /* ------------------- Handle category click ------------------- */
   const handleCategory = (brand) => {
     navigate(`/vehicles?brand=${brand}`);
+  };
+
+  /* ------------------- Handle Request Import Security ------------------- */
+  const handleRequestImport = (vehicleId) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate(`/login?redirect=/vehicle/${vehicleId}#request`);
+    } else {
+      navigate(`/customer/vehicle/${vehicleId}#request`);
+    }
   };
 
   return (
@@ -48,6 +58,7 @@ const Home = () => {
       <section className="hero">
         <div className="hero-overlay">
           <div className="hero-inner">
+
             <div className="hero-text">
               <h1>Get Your Dream Car With Us.</h1>
               <p>
@@ -74,9 +85,7 @@ const Home = () => {
                   <option value="2023">2023</option>
                 </select>
 
-                <select
-                  onChange={(e) => navigate(`/vehicles?priceRange=${e.target.value}`)}
-                >
+                <select onChange={(e) => navigate(`/vehicles?priceRange=${e.target.value}`)}>
                   <option value="">All Prices</option>
                   <option value="0-2000000">Below KES 2M</option>
                   <option value="2000000-5000000">KES 2M - 5M</option>
@@ -86,6 +95,7 @@ const Home = () => {
                 <button onClick={handleSearch}>Search</button>
               </div>
             </div>
+
           </div>
         </div>
       </section>
@@ -102,6 +112,7 @@ const Home = () => {
               onClick={() => handleCategory(brand)}
             >
               <img src={`/images/${brand.toLowerCase()}.jpg`} alt={brand} />
+
               <div className="category-overlay">
                 <h3>{brand}</h3>
                 <FaArrowRight className="arrow" />
@@ -134,20 +145,18 @@ const Home = () => {
                   <p>KES {Number(car.price).toLocaleString()}</p>
 
                   <div className="trend-actions">
+                    {/* PUBLIC VIEW DETAILS */}
                     <button
                       className="book-btn"
-                      onClick={() =>
-                        navigate(`/vehicle/${car._id}`)
-                      }
+                      onClick={() => navigate(`/vehicle/${car._id}`)}
                     >
                       View Details
                     </button>
 
+                    {/* REQUEST IMPORT (LOGIN REQUIRED) */}
                     <button
                       className="import-btn"
-                      onClick={() =>
-                        navigate(`/vehicle/${car._id}#request`)
-                      }
+                      onClick={() => handleRequestImport(car._id)}
                     >
                       Request Import
                     </button>
@@ -164,33 +173,27 @@ const Home = () => {
         <div className="why-container">
           <h2 className="section-title">Why Choose Blowit?</h2>
           <p className="why-subtitle">
-            Trusted Be Forward Agent in Kenya — bringing Japan’s best vehicles right to your doorstep.
+            Trusted Be Forward Agent in Kenya — bringing Japan’s best vehicles
+            right to your doorstep.
           </p>
 
           <div className="why-grid">
             <div className="why-card">
               <img src="/src/assets/authentic.jpg" alt="Authenticity Guaranteed" />
               <h3>Authenticity Guaranteed</h3>
-              <p>
-                We source directly from Japan’s No.1 export company —
-                <strong> Be Forward</strong>.
-              </p>
+              <p>Sourced directly from Japan’s No.1 exporter — Be Forward.</p>
             </div>
 
             <div className="why-card">
               <img src="/src/assets/fast.webp" alt="Fast Turnaround" />
               <h3>Fast Turnaround</h3>
-              <p>
-                Quick shipping from Yokohama, Nagoya, Kobe → Mombasa & Nairobi.
-              </p>
+              <p>Fast shipping from Yokohama, Nagoya, Kobe → Mombasa.</p>
             </div>
 
             <div className="why-card">
               <img src="/src/assets/support.webp" alt="Support" />
               <h3>End-to-End Support</h3>
-              <p>
-                Clearance, shipping, financing, duty—we handle everything.
-              </p>
+              <p>Clearance • Shipping • Financing • Duty — all handled.</p>
             </div>
           </div>
         </div>

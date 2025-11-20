@@ -19,6 +19,7 @@ import CustomerFavourites from './pages/customer/CustomerFavourites'
 import CustomerVehicleDetails from './pages/customer/CustomerVehicleDetails'
 import CustomerOrders from './pages/customer/CustomerOrders'
 import PublicVehicles from './pages/PublicVehicles'
+import PublicVehicleDetails from './pages/PublicVehicleDetails'
 
 function App() {
   
@@ -34,6 +35,7 @@ function App() {
         <Route path='/forgot-password' element={<ForgotPassword/>}/>
 
         <Route path="/vehicles" element={<PublicVehicles />} />
+        <Route path="/vehicle/:id" element={<PublicVehicleDetails />} />
 
         <Route
           path='/admin/dashboard'
