@@ -14,6 +14,7 @@ import {
 import api from "../utils/api";
 import { BASE_URL } from "../utils/config";
 import "../styles/PublicVehicles.css";
+import Layout from "../components/Layout";
 
 const PublicVehicles = () => {
   const navigate = useNavigate();
@@ -90,6 +91,7 @@ const PublicVehicles = () => {
   };
 
   return (
+    <Layout>
     <div className="pv-wrapper">
       {/* ================= HEADER ================= */}
       <div className="pv-header">
@@ -270,6 +272,7 @@ const PublicVehicles = () => {
         </div>
       )}
     </div>
+    </Layout>
   );
 };
 

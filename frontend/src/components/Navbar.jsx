@@ -17,7 +17,7 @@ const Navbar = () => {
     <header className={`navbar-wrapper ${scrolled ? "scrolled" : ""}`}>
       <nav className="navbar">
         <div className="navbar-logo">
-          <Link to="/">Blowit</Link>
+          <Link to="/"><img src="src/assets/blowit-logo.jpeg" className="nav-logo-img"></img>Blowit</Link>
         </div>
 
         <div className={`nav-links ${menuOpen ? "open" : ""}`}>
