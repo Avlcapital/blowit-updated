@@ -100,7 +100,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* CATEGORY SECTION */}
+      {/* CATEGORY SECTION 
       <section className="categories">
         <h2 className="section-title">Car Categories</h2>
 
@@ -120,7 +120,7 @@ const Home = () => {
             </div>
           ))}
         </div>
-      </section>
+      </section>*/}
 
       {/* TRENDING VEHICLES */}
       <section className="trending">
@@ -181,7 +181,7 @@ const Home = () => {
             <div className="why-card">
               <img src="/src/assets/authentic.jpg" alt="Authenticity Guaranteed" />
               <h3>Authenticity Guaranteed</h3>
-              <p>Sourced directly from Japan’s No.1 exporter — Be Forward.</p>
+              <p>Sourced directly from Japan's No.1 exporter - Be Forward.</p>
             </div>
 
             <div className="why-card">
@@ -193,7 +193,7 @@ const Home = () => {
             <div className="why-card">
               <img src="/src/assets/support.webp" alt="Support" />
               <h3>End-to-End Support</h3>
-              <p>Clearance • Shipping • Financing • Duty — all handled.</p>
+              <p>Clearance • Shipping • Financing • Duty - all handled.</p>
             </div>
           </div>
         </div>

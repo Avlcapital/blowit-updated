@@ -35,6 +35,26 @@
   letter-spacing: 1px;
 }
 
+/* Logo image sizing */
+.nav-logo-img {
+  width: 40px;       /* adjust size as needed */
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+/* Align logo and text */
+.navbar-logo a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+
 /* === Links === */
 .nav-links {
   display: flex;
