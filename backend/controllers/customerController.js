@@ -4,26 +4,40 @@ export const getCustomerDashboard = async (req, res) => {
   try {
     const customerId = req.user._id;
 
-    const orders = await Order.countDocuments({ customer: customerId });
-
-    const pendingPayments = await Order.countDocuments({
+    // Total orders
+    const orders = await Order.countDocuments({
       customer: customerId,
-      paymentStatus: "Pending",
     });
 
-    const documents = await Order.aggregate([
+    // Pending payments (FIXED case)
+    const pendingPayments = await Order.countDocuments({
+      customer: customerId,
+      paymentStatus: "PENDING",
+    });
+
+    // Count uploaded shipping documents (FIXED field)
+    const docsAgg = await Order.aggregate([
       { $match: { customer: customerId } },
-      { $unwind: "$documents" },
+      { $unwind: "$shippingDocs" },
       { $count: "totalDocs" },
     ]);
 
+    const documents = docsAgg.length ? docsAgg[0].totalDocs : 0;
+
+    //MATCH FRONTEND EXPECTATION
     res.json({
-      orders,
-      pendingPayments,
-      documents: documents?.[0]?.totalDocs || 0,
+      success: true,
+      stats: {
+        orders,
+        pendingPayments,
+        documents,
+      },
     });
   } catch (err) {
     console.error("Dashboard error:", err);
-    res.status(500).json({ message: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };

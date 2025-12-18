@@ -1,135 +1,286 @@
-// backend/controllers/paymentController.js
-import Order from "../models/Order.js"; // or ImportRequest if you prefer
-import { IPAY_INIT_URL, IPAY_VENDOR, generateIpayHash } from "../config/ipay.js";
-import crypto from "crypto";
+import axios from "axios";
+import Stripe from "stripe";
+import Order from "../models/Order.js";
+import { mpesaAuthToken, mpesaConfig, mpesaPasswordAndTimestamp } from "../config/mpesa.js";
+//import { mpesaAuthToken, mpesaPasswordAndTimestamp, mpesaConfig } from "../config/mpesa.js";
 
-export const initiatePesaLink = async (req, res) => {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// ------------------------------
+// Helpers
+// ------------------------------
+const normalizePhone = (phone) => {
+  // Accepts 07..., 2547..., +2547...
+  let p = String(phone || "").trim();
+  p = p.replace(/\s+/g, "");
+  if (p.startsWith("+")) p = p.slice(1);
+  if (p.startsWith("0")) p = "254" + p.slice(1);
+  return p;
+};
+
+// ------------------------------
+// 1) M-Pesa STK Push Initiate
+// POST /api/payments/mpesa/stk/initiate
+// body: { orderId, phone }
+// ------------------------------
+export const initiateMpesaStkPush = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { orderId, phone, email } = req.body;
+    const { orderId, phone } = req.body;
 
-    const order = await Order.findOne({ _id: orderId, customer: userId });
-    if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" });
+    if (!orderId || !phone) {
+      return res.status(400).json({ success: false, message: "orderId and phone are required" });
     }
 
-    const payAmount = order.depositAmount;
+    const order = await Order.findOne({ _id: orderId, customer: userId }).populate("vehicle");
+    if (!order) return res.status(404).json({ success: false, message: "Order not found" });
 
-    const invoiceId = `BW-${order._id}-${Date.now()}`;
+    // only deposit
+    const amount = Number(order.depositAmount || 0);
+    if (amount <= 0) {
+      return res.status(400).json({ success: false, message: "Invalid deposit amount" });
+    }
 
-    const fields = {
-      vid: IPAY_VENDOR,
-      amount: payAmount,
-      tel: phone,
-      eml: email,
-      curr: "KES",
-      ref: invoiceId,
-      cbk: process.env.IPAY_CALLBACK_URL,
-      cst: "1",
-      crl: "2",
-      p1: "PESALINK",
-      p2: order._id.toString(),
-      p3: userId.toString(),
+    // if already paid
+    if (order.depositPaid || order.paymentStatus === "PAID") {
+      return res.status(400).json({ success: false, message: "Deposit already paid" });
+    }
+
+    const token = await mpesaAuthToken();
+    const { password, timestamp } = mpesaPasswordAndTimestamp();
+
+    const msisdn = normalizePhone(phone);
+    const accountRef = `BLOWIT-${order._id.toString().slice(-6)}`;
+    const transactionDesc = `Deposit for ${order.vehicle?.title || "vehicle import"}`;
+
+    const payload = {
+      BusinessShortCode: mpesaConfig.MPESA_SHORTCODE,
+      Password: password,
+      Timestamp: timestamp,
+      TransactionType: "CustomerPayBillOnline",
+      Amount: amount,
+      PartyA: msisdn,
+      PartyB: mpesaConfig.MPESA_SHORTCODE,
+      PhoneNumber: msisdn,
+      CallBackURL: mpesaConfig.MPESA_CALLBACK_URL,
+      AccountReference: "0810282343619",
+      TransactionDesc: transactionDesc,
     };
 
-    const hash = generateIpayHash(fields);
+    const stkRes = await axios.post(
+      `${mpesaConfig.baseURL}/mpesa/stkpush/v1/processrequest`,
+      payload,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
-    order.paymentProvider = "IPAY";
-    order.paymentRef = invoiceId;
+    // Save refs to order
+    order.paymentProvider = "MPESA";
     order.paymentStatus = "PENDING";
+    order.paymentRef = stkRes.data.CheckoutRequestID; // best unique ref
+    order.paymentMeta = {
+      ...(order.paymentMeta || {}),
+      mpesa: {
+        MerchantRequestID: stkRes.data.MerchantRequestID,
+        CheckoutRequestID: stkRes.data.CheckoutRequestID,
+        CustomerMSISDN: msisdn,
+        Amount: amount,
+      },
+    };
+
     await order.save();
 
-    const redirectUrl = `${IPAY_INIT_URL}?${new URLSearchParams({
-      ...fields,
-      hsh: hash,
-      pesalink: "1",
-    }).toString()}`;
-
-    res.json({ success: true, redirectUrl });
-
+    return res.json({
+      success: true,
+      message: "STK Push sent. Enter PIN on your phone.",
+      checkoutRequestId: stkRes.data.CheckoutRequestID,
+      merchantRequestId: stkRes.data.MerchantRequestID,
+    });
   } catch (err) {
-    console.error("PAYMENT ERROR:", err);
-    res.status(500).json({ success: false, message: err.message });
+    console.error("initiateMpesaStkPush error:", err?.response?.data || err.message);
+    return res.status(500).json({ success: false, message: err?.response?.data?.errorMessage || err.message });
   }
 };
 
-
-export const ipayCallback = async (req, res) => {
+// ------------------------------
+// 2) M-Pesa Callback
+// POST /api/payments/mpesa/callback
+// (Safaricom calls this)
+// ------------------------------
+export const mpesaCallback = async (req, res) => {
   try {
-    // iPay sends various fields (check their docs)
-    const {
-      // common fields
-      ref,        // our invoiceId
-      amt,        // amount paid
-      msisdn_id,  // phone
-      status,     // "SUCCESS", "FAILED", etc.
-      id,         // iPay receipt ID
-      hsh,        // received hash
-      p1, p2, p3, p4,
-    } = req.body;
+    const stk = req.body?.Body?.stkCallback;
+    if (!stk) return res.status(400).json({ success: false, message: "Invalid callback payload" });
 
-    // 1. Rebuild hash to verify integrity (same order of fields as iPay docs)
-    const fields = {
-      ref,
-      amt,
-      msisdn_id,
-      status,
-      id,
-      p1,
-      p2,
-      p3,
-      p4,
+    const { CheckoutRequestID, ResultCode, ResultDesc } = stk;
+
+    const order = await Order.findOne({ paymentRef: CheckoutRequestID });
+    if (!order) {
+      // Still return OK so Safaricom doesn't retry forever
+      return res.json({ ResultCode: 0, ResultDesc: "OK" });
+    }
+
+    // Save raw callback
+    order.paymentMeta = {
+      ...(order.paymentMeta || {}),
+      mpesaCallback: stk,
     };
 
-    const expectedHash = crypto
-      .createHmac("sha256", process.env.IPAY_HASH_KEY)
-      .update(Object.values(fields).join(""))
-      .digest("hex");
+    if (Number(ResultCode) === 0) {
+      // SUCCESS: extract metadata
+      const items = stk.CallbackMetadata?.Item || [];
+      const getItem = (name) => items.find((i) => i.Name === name)?.Value;
 
-    if (expectedHash !== hsh) {
-      console.warn("iPay callback hash mismatch");
-      return res.status(400).send("INVALID HASH");
-    }
+      const amount = Number(getItem("Amount") || 0);
+      const receipt = getItem("MpesaReceiptNumber");
+      const phone = String(getItem("PhoneNumber") || "");
+      const trxDate = getItem("TransactionDate");
 
-    // 2. Find order using p2 (we passed orderId in p2)
-    const orderId = p2;
-    const order = await Order.findById(orderId);
-    if (!order) {
-      console.warn("Order not found for iPay callback:", orderId);
-      return res.status(404).send("ORDER NOT FOUND");
-    }
-
-    // 3. Update order payment status
-    if (status === "SUCCESS") {
       order.paymentStatus = "PAID";
-      order.paymentProvider = "IPAY";
-      order.paymentRef = ref;
-      order.paymentMeta = {
-        receiptId: id,
-        amount: Number(amt || 0),
-        channel: p1,
-        phone: msisdn_id,
-      };
-
-      // optionally mark deposit paid / reduce balance
-      const paidAmount = Number(amt || 0);
       order.depositPaid = true;
-      order.balanceAmount = Math.max(order.totalPrice - paidAmount, 0);
+      order.stageTimestamps = order.stageTimestamps || {};
+      order.stageTimestamps.depositPaidAt = new Date();
+
+      // balance handling (deposit is what we requested)
+      order.balanceAmount = Math.max(Number(order.totalPrice || 0) - Number(order.depositAmount || amount), 0);
+
+      // Optionally move order into Processing
+      if (order.status === "Pending") order.status = "Processing";
+
+      order.paymentMeta = {
+        ...(order.paymentMeta || {}),
+        receiptId: receipt,
+        paidAmount: amount,
+        phone,
+        trxDate,
+      };
     } else {
+      // FAILED / CANCELLED
       order.paymentStatus = "FAILED";
       order.paymentMeta = {
         ...(order.paymentMeta || {}),
-        lastStatus: status,
-        lastReceiptId: id,
+        lastStatus: ResultDesc,
       };
     }
 
     await order.save();
 
-    // 4. Respond 200 so iPay knows we processed it
-    res.status(200).send("OK");
+    // Safaricom requires this standard OK response format
+    return res.json({ ResultCode: 0, ResultDesc: "OK" });
   } catch (err) {
-    console.error("iPay callback error:", err);
-    res.status(500).send("SERVER ERROR");
+    console.error("mpesaCallback error:", err.message);
+    return res.json({ ResultCode: 0, ResultDesc: "OK" });
+  }
+};
+
+// ------------------------------
+// 3) Stripe - Create Checkout Session (Card)
+// POST /api/payments/stripe/checkout
+// body: { orderId }
+// ------------------------------
+export const createStripeCheckout = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { orderId } = req.body;
+
+    const order = await Order.findOne({ _id: orderId, customer: userId }).populate("vehicle");
+    if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+    if (order.depositPaid || order.paymentStatus === "PAID") {
+      return res.status(400).json({ success: false, message: "Deposit already paid" });
+    }
+
+    const amount = Number(order.depositAmount || 0);
+    if (amount <= 0) return res.status(400).json({ success: false, message: "Invalid deposit amount" });
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      payment_method_types: ["card"],
+      customer_email: order.email || req.user.email,
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: "kes",
+            unit_amount: Math.round(amount * 100), // cents
+            product_data: {
+              name: `Deposit for ${order.vehicle?.title || "Vehicle Import"}`,
+              description: `Order ${order._id}`,
+            },
+          },
+        },
+      ],
+      metadata: {
+        orderId: order._id.toString(),
+        customerId: userId.toString(),
+        purpose: "deposit",
+      },
+      success_url: `${process.env.FRONTEND_URL}/customer/orders/${order._id}?paid=1`,
+      cancel_url: `${process.env.FRONTEND_URL}/customer/orders/${order._id}?paid=0`,
+    });
+
+    // Save stripe pending details
+    order.paymentProvider = "STRIPE";
+    order.paymentStatus = "PENDING";
+    order.paymentRef = session.id;
+    order.paymentMeta = { ...(order.paymentMeta || {}), stripeSessionId: session.id };
+    await order.save();
+
+    return res.json({ success: true, checkoutUrl: session.url });
+  } catch (err) {
+    console.error("createStripeCheckout error:", err.message);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ------------------------------
+// 4) Stripe Webhook
+// POST /api/payments/stripe/webhook
+// IMPORTANT: raw body required in route
+// ------------------------------
+export const stripeWebhook = async (req, res) => {
+  try {
+    const sig = req.headers["stripe-signature"];
+    const event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object;
+
+      const orderId = session.metadata?.orderId;
+      if (orderId) {
+        const order = await Order.findById(orderId);
+        if (order) {
+          order.paymentProvider = "STRIPE";
+          order.paymentStatus = "PAID";
+          order.depositPaid = true;
+          order.stageTimestamps = order.stageTimestamps || {};
+          order.stageTimestamps.depositPaidAt = new Date();
+
+          order.paymentMeta = {
+            ...(order.paymentMeta || {}),
+            stripe: {
+              sessionId: session.id,
+              paymentIntent: session.payment_intent,
+              amountTotal: session.amount_total,
+              currency: session.currency,
+            },
+          };
+
+          // update balance
+          order.balanceAmount = Math.max(Number(order.totalPrice || 0) - Number(order.depositAmount || 0), 0);
+          if (order.status === "Pending") order.status = "Processing";
+
+          await order.save();
+        }
+      }
+    }
+
+    return res.json({ received: true });
+  } catch (err) {
+    console.error("stripeWebhook error:", err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 };

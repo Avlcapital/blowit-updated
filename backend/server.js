@@ -35,9 +35,18 @@ app.use("/api/users", userRoutes);
 app.use("/api/customer", customerRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 
+// Stripe webhook MUST use raw body
+app.post(
+  "/api/payments/stripe/webhook",
+  express.raw({ type: "application/json" }),
+  (req, res, next) => next()
+);
+
 
 // Default
 app.get("/", (req, res) => res.send("Blowit API is running..."));
+
+
 
 
 const server = http.createServer(app);
