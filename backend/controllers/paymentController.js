@@ -1,10 +1,13 @@
 import axios from "axios";
 import Stripe from "stripe";
 import Order from "../models/Order.js";
+import dotenv  from "dotenv";
 import { mpesaAuthToken, mpesaConfig, mpesaPasswordAndTimestamp } from "../config/mpesa.js";
 //import { mpesaAuthToken, mpesaPasswordAndTimestamp, mpesaConfig } from "../config/mpesa.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+dotenv.config();
 
 // ------------------------------
 // Helpers
@@ -17,6 +20,9 @@ const normalizePhone = (phone) => {
   if (p.startsWith("0")) p = "254" + p.slice(1);
   return p;
 };
+
+const PAYBILL_NO = process.env.PAYBILL_NO; // Safaricom Paybill number
+const ACCOUNT_NO = process.env.ACCOUNT_NO;
 
 // ------------------------------
 // 1) M-Pesa STK Push Initiate
@@ -60,10 +66,10 @@ export const initiateMpesaStkPush = async (req, res) => {
       TransactionType: "CustomerPayBillOnline",
       Amount: amount,
       PartyA: msisdn,
-      PartyB: mpesaConfig.MPESA_SHORTCODE,
+      PartyB: PAYBILL_NO,
       PhoneNumber: msisdn,
       CallBackURL: mpesaConfig.MPESA_CALLBACK_URL,
-      AccountReference: "0810282343619",
+      AccountReference: ACCOUNT_NO,
       TransactionDesc: transactionDesc,
     };
 
@@ -96,10 +102,13 @@ export const initiateMpesaStkPush = async (req, res) => {
       merchantRequestId: stkRes.data.MerchantRequestID,
     });
   } catch (err) {
-    console.error("initiateMpesaStkPush error:", err?.response?.data || err.message);
-    return res.status(500).json({ success: false, message: err?.response?.data?.errorMessage || err.message });
-  }
-};
+  console.error("MPESA FULL ERROR:", err.response?.data || err);
+
+  return res.status(500).json({
+    success: false,
+    error: err.response?.data || err.message,
+  });
+  }};
 
 // ------------------------------
 // 2) M-Pesa Callback
