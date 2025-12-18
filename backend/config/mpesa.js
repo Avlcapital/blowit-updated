@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const {
-  MPESA_ENV = "sandbox", // "sandbox" or "production"
+  MPESA_ENV = "production", // "sandbox" or "production"
   MPESA_CONSUMER_KEY,
   MPESA_CONSUMER_SECRET,
   MPESA_SHORTCODE,
@@ -9,10 +9,7 @@ const {
   MPESA_CALLBACK_URL, // e.g. https://api.blowit.africa/api/payments/mpesa/callback
 } = process.env;
 
-const baseURL =
-  MPESA_ENV === "production"
-    ? "https://api.safaricom.co.ke"
-    : "https://sandbox.safaricom.co.ke";
+const baseURL = "https://sandbox.safaricom.co.ke";
 
 export const mpesaAuthToken = async () => {
   const auth = Buffer.from(`${MPESA_CONSUMER_KEY}:${MPESA_CONSUMER_SECRET}`).toString("base64");

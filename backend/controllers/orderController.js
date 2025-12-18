@@ -1,7 +1,7 @@
 import Order from "../models/Order.js";
 import Vehicle from "../models/Vehicle.js";
 import cloudinary from "../config/cloudinary.js";
-import { sendMail } from "../utils/email.js";
+//import { sendMail } from "../utils/email.js";
 import { orderEmails } from "../utils/templates/orderEmails.js";
 
 import { getIO } from "../socket.js";
@@ -27,30 +27,25 @@ export const createOrder = async (req, res) => {
     const order = await Order.create({
       vehicle: vehicleId,
       customer: customerId,
-
       fullName,
       phone,
       email,
-
       depositPercent: dp,
       totalPrice: price,
       depositAmount,
       balanceAmount,
-
       status: "Pending",
     });
 
-    // notify customer (non-blocking)
     const { subject, html } = orderEmails.created({
       customerName: req.user.name || "Customer",
       orderId: order._id.toString(),
       vehicleTitle: `${vehicle.title || `${vehicle.brand} ${vehicle.model}`} (${vehicle.year || ""})`,
-      totalPrice,
-      depositAmount: depositAmount || Math.round(totalPrice * 0.5),
+      totalPrice: price,
+      depositAmount,
     });
-    sendMail({ to: req.user.email, subject, html });
 
-    await order.save();
+    //sendMail({ to: req.user.email, subject, html });
 
     getIO().emit("order:created", { order });
 
@@ -59,6 +54,7 @@ export const createOrder = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 /*GET ALL ORDERS (Admin/AVLC)*/
 export const getAllOrders = async (req, res) => {
