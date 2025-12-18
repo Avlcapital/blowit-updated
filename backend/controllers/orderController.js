@@ -1,7 +1,7 @@
 import Order from "../models/Order.js";
 import Vehicle from "../models/Vehicle.js";
 import cloudinary from "../config/cloudinary.js";
-//import { sendMail } from "../utils/email.js";
+import { sendMail } from "../utils/email.js";
 import { orderEmails } from "../utils/templates/orderEmails.js";
 
 import { getIO } from "../socket.js";
@@ -45,7 +45,7 @@ export const createOrder = async (req, res) => {
       depositAmount,
     });
 
-    //sendMail({ to: req.user.email, subject, html });
+    sendMail({ to: req.user.email, subject, html });
 
     getIO().emit("order:created", { order });
 
