@@ -135,3 +135,23 @@
   cursor: pointer;
   margin-top: 0.5rem;
 }
+
+.rim-tabs{
+  display:flex;
+  gap:.6rem;
+  padding: .5rem 0 1rem;
+}
+.rim-tabs button{
+  flex:1;
+  border:1px solid #dbe2ea;
+  background:#f7f9fc;
+  padding:.7rem;
+  border-radius:10px;
+  font-weight:700;
+  cursor:pointer;
+}
+.rim-tabs button.active{
+  background:#003366;
+  border-color:#003366;
+  color:#fff;
+}

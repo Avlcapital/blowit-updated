@@ -22,5 +22,10 @@ import { BASE_URL } from "./config";
 export const createImportOrder = (data) =>
   api.post(`${BASE_URL}/api/orders/create`, data);
 
-export const initiatePesaLinkPayment = (data) =>
-  api.post(`${BASE_URL}/api/payments/pesalink/initiate`, data);
+// M-Pesa STK initiate (protected)
+export const initiateMpesaStk = (data) =>
+  api.post(`${BASE_URL}/api/payments/mpesa/stk/initiate`, data);
+
+// Stripe checkout (protected)
+export const createStripeCheckout = (data) =>
+  api.post(`${BASE_URL}/api/payments/stripe/checkout`, data);

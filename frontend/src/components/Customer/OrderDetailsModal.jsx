@@ -11,15 +11,34 @@ import api from "../../utils/api";
 import { BASE_URL } from "../../utils/config";
 import "../../styles/customer/CustomerOrders.css";
 
+/* ---------------- HELPERS ---------------- */
+const getFileType = (url = "") => {
+  const u = url.toLowerCase();
+  if (u.endsWith(".pdf")) return "pdf";
+  if (u.match(/\.(jpg|jpeg|png|gif|webp)$/)) return "image";
+  return "other";
+};
+
+const getFileName = (url = "", index = 0) => {
+  try {
+    return decodeURIComponent(url.split("/").pop().split("?")[0]);
+  } catch {
+    return `Document-${index + 1}`;
+  }
+};
+/* ----------------------------------------- */
+
 const OrderDetailsModal = ({ order, onClose, onUpdated }) => {
   const vehicle = order.vehicle || {};
   const [reason, setReason] = useState("");
   const [sending, setSending] = useState(false);
   const [showReasonBox, setShowReasonBox] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState(null);
 
   const orderCode = `BLW-${String(order._id).slice(-6).toUpperCase()}`;
 
-  const canRequestCancel = !order.cancellationRequested &&
+  const canRequestCancel =
+    !order.cancellationRequested &&
     !["COMPLETED", "CANCELLED", "REJECTED"].includes(
       (order.status || "").toUpperCase()
     );
@@ -41,15 +60,13 @@ const OrderDetailsModal = ({ order, onClose, onUpdated }) => {
         onClose();
       }
     } catch (err) {
-      alert(
-        err.response?.data?.message || "Failed to send cancellation request."
-      );
+      alert(err.response?.data?.message || "Failed to send request.");
     } finally {
       setSending(false);
     }
   };
 
-  const docs = order.docs || [];
+  const docs = order.shippingDocs || [];
   const createdAt = new Date(order.createdAt);
 
   return (
@@ -66,97 +83,120 @@ const OrderDetailsModal = ({ order, onClose, onUpdated }) => {
         </div>
 
         <div className="co-modal-body">
-          {/* Left: Vehicle summary */}
+          {/* LEFT */}
           <div className="co-modal-left">
             <img
               src={vehicle.images?.[0]?.url || "/placeholder-car.jpg"}
               alt="vehicle"
               className="co-modal-main-img"
             />
-            <h3 className="co-modal-vehicle-title">
-              {vehicle.title || `${vehicle.brand || ""} ${vehicle.model || ""}`}
+
+            <h3>
+              {vehicle.title ||
+                `${vehicle.brand || ""} ${vehicle.model || ""}`}
             </h3>
-            <p className="co-modal-location">
+
+            <p>
               <FaMapMarkerAlt /> {vehicle.location || "Japan / Mombasa"}
             </p>
 
-            <div className="co-modal-specs">
-              <p>
-                <FaStopwatch /> Year: {vehicle.year}
-              </p>
-              <p>
-                <FaCarSide /> Mileage:{" "}
-                {Number(vehicle.mileage || 0).toLocaleString()} km
-              </p>
-              <p>
-                <FaGasPump /> Fuel: {vehicle.fuelType}
-              </p>
-              <p>Transmission: {vehicle.transmission}</p>
-            </div>
+            <p>
+              <FaStopwatch /> Year: {vehicle.year}
+            </p>
+            <p>
+              <FaCarSide /> Mileage:{" "}
+              {Number(vehicle.mileage || 0).toLocaleString()} km
+            </p>
+            <p>
+              <FaGasPump /> Fuel: {vehicle.fuelType}
+            </p>
           </div>
 
-          {/* Right: Financials + docs + status */}
+          {/* RIGHT */}
           <div className="co-modal-right">
-            {/* Status & amounts */}
+            {/* SUMMARY */}
             <div className="co-box">
               <h4>Order Summary</h4>
-              <p>
-                Status: <strong>{order.status}</strong>
-                {order.cancellationRequested && (
-                  <span className="co-cancel-tag-inline">
-                    Cancellation requested
-                  </span>
-                )}
-              </p>
-              <p>
-                Order Date: <strong>{createdAt.toLocaleString()}</strong>
-              </p>
-              <p>
-                Total Price:{" "}
-                <strong>
-                  KES {Number(order.totalPrice || 0).toLocaleString()}
-                </strong>
-              </p>
-              <p>
-                Deposit Paid:{" "}
-                <strong>
-                  KES {Number(order.depositAmount || 0).toLocaleString()}
-                </strong>
-              </p>
-              <p>
-                Balance Remaining:{" "}
-                <strong>
-                  KES {Number(order.balanceAmount || 0).toLocaleString()}
-                </strong>
-              </p>
+              <p>Status: <strong>{order.status}</strong></p>
+              <p>Order Date: <strong>{createdAt.toLocaleString()}</strong></p>
+              <p>Total: <strong>KES {order.totalPrice?.toLocaleString()}</strong></p>
+              <p>Deposit: <strong>KES {order.depositAmount?.toLocaleString()}</strong></p>
+              <p>Balance: <strong>KES {order.balanceAmount?.toLocaleString()}</strong></p>
             </div>
 
-            {/* Docs */}
+            {/* DOCUMENTS */}
             <div className="co-box">
               <h4>Documents</h4>
+
               {docs.length === 0 ? (
                 <p className="co-docs-none">
-                  No documents uploaded yet. Once shipping docs are ready,
-                  they will appear here.
+                  No documents uploaded yet.
                 </p>
               ) : (
                 <ul className="co-docs-list">
-                  {docs.map((d, idx) => (
-                    <li key={idx}>
-                      <FaFileAlt />
-                      <a href={d.url} target="_blank" rel="noreferrer">
-                        {d.name || `Document ${idx + 1}`}
-                      </a>
-                      {d.type && <span className="co-doc-tag">{d.type}</span>}
-                    </li>
-                  ))}
+                  {docs.map((d, idx) => {
+                    const type = getFileType(d.url);
+                    const name = getFileName(d.url, idx);
+
+                    return (
+                      <li key={idx} className="co-doc-item">
+                        <FaFileAlt />
+                        <span className="co-doc-name">{name}</span>
+
+                        {(type === "pdf" || type === "image") && (
+                          <button
+                            className="co-doc-btn"
+                            onClick={() => setPreviewDoc(d)}
+                          >
+                            Preview
+                          </button>
+                        )}
+
+                        <a
+                          href={d.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          download
+                          className="co-doc-download"
+                        >
+                          Download
+                        </a>
+                      </li>
+                    );
+                  })}
                 </ul>
+              )}
+
+              {/* PREVIEW PANEL */}
+              {previewDoc && (
+                <div className="co-doc-preview">
+                  <div className="co-doc-preview-header">
+                    <span>Preview</span>
+                    <FaTimes onClick={() => setPreviewDoc(null)} />
+                  </div>
+
+                  {getFileType(previewDoc.url) === "pdf" ? (
+                    <iframe
+                      src={previewDoc.url}
+                      title="Document Preview"
+                      width="100%"
+                      height="400"
+                    />
+                  ) : (
+                    <img
+                      src={previewDoc.url}
+                      alt="Preview"
+                      style={{ width: "100%", maxHeight: "400px" }}
+                    />
+                  )}
+                </div>
               )}
             </div>
 
-            {/* Cancellation request */}
+            {/* CANCELLATION */}
             <div className="co-box">
-              <h4>Need to cancel this order?</h4>
+              <h4>Cancellation</h4>
+
               {canRequestCancel ? (
                 <>
                   {!showReasonBox ? (
@@ -170,33 +210,21 @@ const OrderDetailsModal = ({ order, onClose, onUpdated }) => {
                     <>
                       <textarea
                         rows="3"
-                        placeholder="Explain why you want to cancel this order..."
+                        placeholder="Why do you want to cancel?"
                         value={reason}
                         onChange={(e) => setReason(e.target.value)}
-                      ></textarea>
-                      <div className="co-cancel-actions">
-                        <button
-                          className="co-cancel-btn"
-                          onClick={handleCancelRequest}
-                          disabled={sending}
-                        >
-                          {sending ? "Sending..." : "Submit Request"}
-                        </button>
-                        <button
-                          className="co-secondary-btn"
-                          onClick={() => setShowReasonBox(false)}
-                        >
-                          <FaTimes /> Close
-                        </button>
-                      </div>
+                      />
+                      <button
+                        disabled={sending}
+                        onClick={handleCancelRequest}
+                      >
+                        {sending ? "Sending..." : "Submit"}
+                      </button>
                     </>
                   )}
                 </>
               ) : (
-                <p className="co-note">
-                  This order cannot be cancelled because it is already{" "}
-                  <strong>{order.status}</strong> or a request is in progress.
-                </p>
+                <p>This order cannot be cancelled.</p>
               )}
             </div>
           </div>
