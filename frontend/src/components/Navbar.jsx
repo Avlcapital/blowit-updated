@@ -30,7 +30,7 @@ const Navbar = () => {
         </div>
 
         <div className="nav-icons">
-          <FaSearch className="nav-search" />
+          {/*<FaSearch className="nav-search" />*/}
           <div className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <FaTimes /> : <FaBars />}
           </div>

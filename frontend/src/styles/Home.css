@@ -5,7 +5,7 @@
 .hero {
   width: 100%;
   height: 100vh;
-  background: url("/src/assets/hero-car.webp") center/cover no-repeat;
+  background: url("/src/assets/background.jpg") center/cover no-repeat;
   position: relative;
   display: flex;
   align-items: center;
@@ -37,6 +37,7 @@
   width: 70%;
   opacity: 0.9;
   line-height: 1.6;
+  margin-left: 10rem;
 }
 
 .hero-search {
