@@ -37,7 +37,7 @@ const AdminOrders = () => {
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
-  // 🔴 Real-time subscriptions
+  // Real-time subscriptions
   useEffect(() => {
     const s = getSocket();
 

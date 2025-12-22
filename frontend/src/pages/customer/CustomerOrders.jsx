@@ -130,7 +130,7 @@ const CustomerOrders = () => {
               {orders.map((o) => {
                 const v = o.vehicle || {};
                 const orderCode = `BLW-${String(o._id).slice(-6).toUpperCase()}`;
-                const docsCount = o.docs?.length || 0;
+                const docsCount = o.shippingDocs?.length || 0;
 
                 return (
                   <tr key={o._id}>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaBars, FaTimes, FaSearch } from "react-icons/fa";
 import "../styles/Navbar.css";
+import logo from "../assets/logo.jpeg"
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -17,7 +18,7 @@ const Navbar = () => {
     <header className={`navbar-wrapper ${scrolled ? "scrolled" : ""}`}>
       <nav className="navbar">
         <div className="navbar-logo">
-          <Link to="/"><img src="src/assets/blowit-logo.jpeg" className="nav-logo-img"></img>Blowit</Link>
+          <Link to="/"><img src={logo} className="nav-logo-img"></img>Blowit</Link>
         </div>
 
         <div className={`nav-links ${menuOpen ? "open" : ""}`}>
