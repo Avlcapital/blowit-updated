@@ -67,7 +67,7 @@ const Home = () => {
               <h1>Get Your Dream Car With Us.</h1>
               <p>
                 Purchase your next car through Blowit — the exclusive Be Forward
-                agent in Kenya. Pay <strong>50% deposit</strong>, and AVLC
+                agent in Kenya. Pay <strong>50% deposit</strong>, and Our trusted financial partner
                 finances the rest.
               </p>
             </div>

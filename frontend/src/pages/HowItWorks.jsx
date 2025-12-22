@@ -5,7 +5,7 @@ import "../styles/HowItWorks.css";
 import chooseCar from "../assets/how-to-choose.webp";
 import finance from "../assets/how-finance.jpg";
 import delivery from "../assets/how-delivery.jpg";
-import summary from "../assets/how-summary.jpg";
+import final from "../assets/final.jpg";
 
 const HowItWorks = () => {
   return (
@@ -17,7 +17,7 @@ const HowItWorks = () => {
             <h1>How Blowit Works</h1>
             <p>
               Bringing your dream car from Japan to Kenya made easy - powered by
-              Be Forward and AVLC Group financing.
+              Be Forward and our financial partners providing support.
             </p>
           </div>
         </div>
@@ -53,7 +53,7 @@ const HowItWorks = () => {
             <div className="how-text">
               <h3>2️. Secure Financing</h3>
               <p>
-                Pay a <strong>50% deposit</strong>, and AVLC Group finances the
+                Pay a <strong>50% deposit</strong>, and our financial partner finances the
                 rest. We purchase the car on your behalf directly from Japan,
                 ensuring authenticity and verified documents.
               </p>
@@ -94,7 +94,7 @@ const HowItWorks = () => {
               At Blowit, we make car importation simple, transparent, and secure
               - from your first click to your new car keys.
             </p>
-            <img src={summary} alt="Customer receiving car keys" />
+            <img src={final} alt="Customer receiving car keys" />
           </div>
         </div>
       </section>

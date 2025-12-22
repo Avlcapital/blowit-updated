@@ -10,7 +10,7 @@ export default function Footer() {
           <h4>About Blowit</h4>
           <p>
             Exclusive Be Forward agent for Kenya. Import cars safely and affordably
-            with AVLC financing support.
+            with our financing partners offering financial support.
           </p>
         </div>
         <div>
