@@ -6,6 +6,10 @@ import Layout from "../components/Layout.jsx";
 import api from "../utils/api";
 import { BASE_URL } from "../utils/config";
 
+import authentic from "../assets/authentic.jpg"
+import fast from "../assets/fast.webp"
+import support from "../assets/support.webp"
+
 import "../styles/Home.css";
 
 const Home = () => {
@@ -179,19 +183,19 @@ const Home = () => {
 
           <div className="why-grid">
             <div className="why-card">
-              <img src="/src/assets/authentic.jpg" alt="Authenticity Guaranteed" />
+              <img src={authentic} alt="Authenticity Guaranteed" />
               <h3>Authenticity Guaranteed</h3>
               <p>Sourced directly from Japan's No.1 exporter - Be Forward.</p>
             </div>
 
             <div className="why-card">
-              <img src="/src/assets/fast.webp" alt="Fast Turnaround" />
+              <img src={fast} alt="Fast Turnaround" />
               <h3>Fast Turnaround</h3>
               <p>Fast shipping from Yokohama, Nagoya, Kobe → Mombasa.</p>
             </div>
 
             <div className="why-card">
-              <img src="/src/assets/support.webp" alt="Support" />
+              <img src={support} alt="Support" />
               <h3>End-to-End Support</h3>
               <p>Clearance • Shipping • Financing • Duty - all handled.</p>
             </div>
