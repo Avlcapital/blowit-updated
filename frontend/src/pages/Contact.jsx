@@ -51,11 +51,11 @@ const Contact = () => {
           <div className="contact-info">
             <div className="info-box">
               <FaPhoneAlt className="info-icon" />
-              <p>+254 700 123 456</p>
+              <p>+254202304180</p>
             </div>
             <div className="info-box">
               <FaEnvelope className="info-icon" />
-              <p>info@blowit.africa</p>
+              <p>info@blowitafrica.com</p>
             </div>
             <div className="info-box">
               <FaMapMarkerAlt className="info-icon" />
