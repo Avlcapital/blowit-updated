@@ -5,6 +5,10 @@ import fs from "fs";
 import { Parser as Json2CsvParser } from "json2csv";
 import csv from "csv-parser";
 import { beforwardQueue } from "../jobs/befowardQueue.js";
+import {
+  formatBeForwardSyncSummary,
+  syncBeForwardInventory,
+} from "../services/beforwardSyncService.js";
 
 /* CREATE */
 export const createVehicle = async (req, res) => {
@@ -448,11 +452,40 @@ export const importVehiclesCSV = async (req, res) => {
 
 export const importFromBeForward = async (req, res) => {
   try {
-    await beforwardQueue.add(
-      { feedUrl: process.env.BEFORWARD_FEED_URL },
-      { attempts: 3, backoff: 60000 }
-    );
-    res.json({ success: true, message: "Be Forward sync queued." });
+    const feedUrl = req.body?.feedUrl || process.env.BEFORWARD_FEED_URL;
+    const requestedMode =
+      req.query.mode || req.body?.mode || process.env.BEFORWARD_SYNC_MODE || "direct";
+    const markMissingAsSold =
+      req.body?.markMissingAsSold !== false && req.query.markMissingAsSold !== "false";
+
+    if (!feedUrl) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "BeForward feed URL is missing. Set BEFORWARD_FEED_URL or include feedUrl in the request body.",
+      });
+    }
+
+    if (requestedMode === "queue") {
+      const job = await beforwardQueue.add(
+        { feedUrl, markMissingAsSold },
+        { attempts: 3, backoff: 60000, removeOnComplete: 20, removeOnFail: 20 }
+      );
+
+      return res.json({
+        success: true,
+        queued: true,
+        jobId: job.id,
+        message: "BeForward sync queued.",
+      });
+    }
+
+    const result = await syncBeForwardInventory({ feedUrl, markMissingAsSold });
+    res.json({
+      success: true,
+      result,
+      message: formatBeForwardSyncSummary(result),
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
