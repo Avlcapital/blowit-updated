@@ -17,7 +17,6 @@ import wishlistRoutes from "./routes/wishlistRoutes.js";
 
 
 dotenv.config();
-connectDB();
 
 const app = express();
 
@@ -56,4 +55,15 @@ initSocket(server);
 
 // Server
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+const startServer = async () => {
+  try {
+    await connectDB();
+    server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  } catch (error) {
+    console.error(`Failed to start server: ${error.message}`);
+    process.exit(1);
+  }
+};
+
+startServer();
