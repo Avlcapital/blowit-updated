@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import CustomerLayout from "../../components/Customer/CustomerLayout";
 import api from "../../utils/api";
 import { BASE_URL } from "../../utils/config";
-
+import { normalizeVehicleMedia } from "../../utils/vehicleMedia";
 import {
   FaHeart,
   FaCarSide,
@@ -12,50 +12,95 @@ import {
   FaCog,
   FaMapMarkerAlt,
   FaExchangeAlt,
-  FaFilePdf,
   FaFileAlt,
   FaCheckCircle,
   FaClock,
-  FaPlayCircle
+  FaPlayCircle,
 } from "react-icons/fa";
-
 import "../../styles/customer/CustomerVehicleDetails.css";
 import VehicleQuickViewModal from "../../components/Customer/VehicleQuickViewModal";
 
+const formatValue = (value, fallback = "N/A") => {
+  if (value === 0) return "0";
+  return value || fallback;
+};
+
+const formatNumber = (value, suffix = "", fallback = "N/A") => {
+  if (value === 0) return `0${suffix}`;
+  if (!value) return fallback;
+  return `${Number(value).toLocaleString()}${suffix}`;
+};
+
+const formatDate = (value) => {
+  if (!value) return "N/A";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "N/A" : date.toLocaleDateString();
+};
+
 const CustomerVehicleDetails = () => {
   const { id } = useParams();
-  const [vehicle, setVehicle] = useState(null);
-  const [activeImage, setActiveImage] = useState(0);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const initialVehicle = location.state?.vehicle || null;
 
+  const [vehicle, setVehicle] = useState(initialVehicle);
+  const [loading, setLoading] = useState(!initialVehicle);
+  const [error, setError] = useState("");
+  const [activeImage, setActiveImage] = useState(0);
   const [show360, setShow360] = useState(false);
   const [showAuctionSheet, setShowAuctionSheet] = useState(false);
-
   const [quickViewVehicle, setQuickViewVehicle] = useState(null);
 
-  // Loan calculator
   const [depositPercent, setDepositPercent] = useState(30);
   const [months, setMonths] = useState(12);
   const [loan, setLoan] = useState(0);
   const [monthlyPay, setMonthlyPay] = useState(0);
-
-  // Duty calculator
   const [duty, setDuty] = useState(0);
 
-  /* Fetch selected vehicle */
-  const loadVehicle = async () => {
-    try {
-      const res = await api.get(`${BASE_URL}/api/vehicles/${id}`);
-      if (res.data.success) setVehicle(res.data.vehicle);
-    } catch (err) {
-      console.log("Failed to fetch vehicle", err);
-    }
-  };
-
   useEffect(() => {
-    loadVehicle();
-  }, [id]);
+    let isMounted = true;
 
-  /* Loan & Duty calculations */
+    const loadVehicle = async () => {
+      try {
+        setLoading(true);
+        setError("");
+        let res;
+
+        try {
+          res = await api.get(`${BASE_URL}/api/vehicles/public/${id}`);
+        } catch {
+          res = await api.get(`${BASE_URL}/api/vehicles/${id}`);
+        }
+
+        if (!isMounted) return;
+
+        if (res.data.success) {
+          setVehicle(res.data.vehicle);
+          setActiveImage(0);
+          setShow360(false);
+          setShowAuctionSheet(false);
+        } else {
+          setVehicle(null);
+          setError("We could not load this vehicle right now.");
+        }
+      } catch (err) {
+        if (!isMounted) return;
+        setVehicle((currentVehicle) => currentVehicle || initialVehicle);
+        setError(
+          err.response?.data?.message || "Failed to fetch this vehicle."
+        );
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    loadVehicle();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id, initialVehicle]);
+
   useEffect(() => {
     if (!vehicle?.price) return;
 
@@ -68,162 +113,302 @@ const CustomerVehicleDetails = () => {
     const interestRate = 0.18;
     const monthly = (loanAmount + loanAmount * interestRate) / months;
     setMonthlyPay(Math.ceil(monthly));
-
-    const estimatedDuty = Math.round(price * 0.45);
-    setDuty(estimatedDuty);
+    setDuty(Math.round(price * 0.45));
   }, [vehicle, depositPercent, months]);
 
   const addToCompare = () => {
+    if (!vehicle) return;
+
     const saved = JSON.parse(localStorage.getItem("compareList")) || [];
-    if (saved.some((v) => v._id === vehicle._id)) {
+    if (saved.some((savedVehicle) => savedVehicle._id === vehicle._id)) {
       alert("Already added to comparison.");
       return;
     }
-    if (saved.length >= 4) return alert("Max 4 vehicles allowed.");
+
+    if (saved.length >= 4) {
+      alert("Max 4 vehicles allowed.");
+      return;
+    }
+
     localStorage.setItem("compareList", JSON.stringify([...saved, vehicle]));
     alert("Added to comparison list");
   };
 
-  if (!vehicle) return <CustomerLayout><p>Loading...</p></CustomerLayout>;
+  if (loading && !vehicle) {
+    return (
+      <CustomerLayout>
+        <div className="vd-state">
+          <h2>Loading vehicle...</h2>
+          <p>We are preparing the full details for this import listing.</p>
+        </div>
+      </CustomerLayout>
+    );
+  }
 
-  const images = vehicle.images || [];
-  const mainImg = images[activeImage]?.url || "/placeholder-car.jpg";
+  if (!vehicle) {
+    return (
+      <CustomerLayout>
+        <div className="vd-state">
+          <h2>Vehicle not available</h2>
+          <p>{error || "This vehicle could not be found."}</p>
+          <button
+            className="vd-back-btn"
+            onClick={() => navigate("/customer/vehicles")}
+          >
+            Back to Browse Vehicles
+          </button>
+        </div>
+      </CustomerLayout>
+    );
+  }
+
+  const images = normalizeVehicleMedia(vehicle.images, 18);
+  const displayImages = images.length ? images : [{ url: "/placeholder-car.jpg" }];
+  const mainImg = displayImages[activeImage]?.url || "/placeholder-car.jpg";
+  const spinImages = normalizeVehicleMedia(vehicle.spinImages, 24);
+  const hasSpinExperience = Boolean(vehicle.model3dUrl || spinImages.length);
+  const isAuctionPdf = /\.pdf(\?|$)/i.test(vehicle.auctionSheetUrl || "");
+  const title = vehicle.title || `${vehicle.brand} ${vehicle.model}`;
 
   return (
     <CustomerLayout>
       <div className="vd-breadcrumb">
-        <span>Home / Vehicles / {vehicle.brand} {vehicle.model}</span>
+        <span>
+          Customer / Vehicles / {vehicle.brand || "Vehicle"} {vehicle.model || ""}
+        </span>
       </div>
 
       <div className="vd-container">
-
-        {/* LEFT SECTION: Gallery */}
         <div className="vd-left">
-          <img className="vd-main-img" src={mainImg} alt="vehicle" />
+          <img className="vd-main-img" src={mainImg} alt={title} />
 
           <div className="vd-thumbs">
-            {images.map((img, idx) => (
+            {displayImages.map((img, idx) => (
               <img
-                key={idx}
+                key={`${img.url}-${idx}`}
                 src={img.url}
+                alt={`${title} ${idx + 1}`}
                 className={activeImage === idx ? "active" : ""}
                 onClick={() => setActiveImage(idx)}
               />
             ))}
           </div>
 
-          {(vehicle.has360 || vehicle.model3dUrl) && (
+          {hasSpinExperience && (
             <button className="vd-360-btn" onClick={() => setShow360(true)}>
-              <FaPlayCircle /> View 360°
+              <FaPlayCircle /> View 360 / 3D
             </button>
           )}
 
-          {/* AUCTION SHEET BUTTON */}
           {vehicle.auctionSheetUrl && (
-            <button className="vd-auction-btn" onClick={() => setShowAuctionSheet(true)}>
+            <button
+              className="vd-auction-btn"
+              onClick={() => setShowAuctionSheet(true)}
+            >
               <FaFileAlt /> View Auction Sheet
             </button>
           )}
         </div>
 
-        {/* RIGHT SECTION */}
         <div className="vd-right">
-          <h1>{vehicle.title || `${vehicle.brand} ${vehicle.model}`}</h1>
+          <h1>{title}</h1>
 
-          <h2 className="vd-price">KES {vehicle.price.toLocaleString()}</h2>
+          <h2 className="vd-price">
+            KES {Number(vehicle.price || 0).toLocaleString()}
+          </h2>
+
+          {vehicle.sourcePrice && vehicle.sourceCurrency && (
+            <p className="vd-source-price">
+              Source price: {vehicle.sourceCurrency}{" "}
+              {Number(vehicle.sourcePrice).toLocaleString()}
+            </p>
+          )}
 
           <div className="vd-actions">
-            <button onClick={addToCompare}><FaExchangeAlt /> Compare</button>
-            <button><FaHeart /> Favourite</button>
+            <button onClick={addToCompare}>
+              <FaExchangeAlt /> Compare
+            </button>
+            <button type="button">
+              <FaHeart /> Favourite
+            </button>
           </div>
 
-          {/* MAIN SPECS */}
           <div className="vd-specs">
-            <p><FaStopwatch /> Year: {vehicle.year}</p>
-            <p><FaCarSide /> Mileage: {vehicle.mileage.toLocaleString()} km</p>
-            <p><FaGasPump /> Fuel: {vehicle.fuelType}</p>
-            <p><FaCog /> Transmission: {vehicle.transmission}</p>
-            <p><FaMapMarkerAlt /> Location: {vehicle.location || "Japan"}</p>
+            <p>
+              <FaStopwatch /> Year: {formatValue(vehicle.year)}
+            </p>
+            <p>
+              <FaCarSide /> Mileage: {formatNumber(vehicle.mileage, " km")}
+            </p>
+            <p>
+              <FaGasPump /> Fuel: {formatValue(vehicle.fuelType)}
+            </p>
+            <p>
+              <FaCog /> Transmission: {formatValue(vehicle.transmission)}
+            </p>
+            <p>
+              <FaMapMarkerAlt /> Location: {formatValue(vehicle.location, "Japan")}
+            </p>
           </div>
 
-          {/* FULL SPECS BOX */}
           <div className="vd-specs-box">
             <h3>Vehicle Specifications</h3>
 
             <div className="vd-spec-section">
               <h4>Basic Information</h4>
               <ul>
-                <li><span>Make:</span> {vehicle.brand}</li>
-                <li><span>Model:</span> {vehicle.model}</li>
-                <li><span>Year:</span> {vehicle.year}</li>
-                <li><span>Condition:</span> {vehicle.condition || "Used"}</li>
-                <li><span>Stock Number:</span> {vehicle.stockNumber || "N/A"}</li>
+                <li>
+                  <span>Make:</span> {formatValue(vehicle.brand)}
+                </li>
+                <li>
+                  <span>Model:</span> {formatValue(vehicle.model)}
+                </li>
+                <li>
+                  <span>Year:</span> {formatValue(vehicle.year)}
+                </li>
+                <li>
+                  <span>Condition:</span> {formatValue(vehicle.condition, "Used")}
+                </li>
+                <li>
+                  <span>Stock Number:</span> {formatValue(vehicle.stockNumber)}
+                </li>
               </ul>
             </div>
 
             <div className="vd-spec-section">
               <h4>Performance & Engine</h4>
               <ul>
-                <li><span>Engine Capacity:</span> {vehicle.engineCapacity || "N/A"}</li>
-                <li><span>Fuel:</span> {vehicle.fuelType}</li>
-                <li><span>Transmission:</span> {vehicle.transmission}</li>
-                <li><span>Drive Type:</span> {vehicle.driveType || "2WD"}</li>
-                <li><span>Mileage:</span> {vehicle.mileage.toLocaleString()} km</li>
+                <li>
+                  <span>Engine Capacity:</span> {formatValue(vehicle.engineCapacity)}
+                </li>
+                <li>
+                  <span>Fuel:</span> {formatValue(vehicle.fuelType)}
+                </li>
+                <li>
+                  <span>Transmission:</span> {formatValue(vehicle.transmission)}
+                </li>
+                <li>
+                  <span>Drive Type:</span> {formatValue(vehicle.driveType, "2WD")}
+                </li>
+                <li>
+                  <span>Mileage:</span> {formatNumber(vehicle.mileage, " km")}
+                </li>
               </ul>
             </div>
 
             <div className="vd-spec-section">
               <h4>Exterior</h4>
               <ul>
-                <li><span>Color:</span> {vehicle.color || "N/A"}</li>
-                <li><span>Body Type:</span> {vehicle.bodyType || "N/A"}</li>
-                <li><span>Doors:</span> {vehicle.doors || "N/A"}</li>
-                <li><span>Wheels:</span> {vehicle.wheels || "N/A"}</li>
+                <li>
+                  <span>Color:</span>{" "}
+                  {formatValue(vehicle.exteriorColor || vehicle.color)}
+                </li>
+                <li>
+                  <span>Body Type:</span> {formatValue(vehicle.bodyType)}
+                </li>
+                <li>
+                  <span>Doors:</span> {formatValue(vehicle.doors)}
+                </li>
+                <li>
+                  <span>Wheels:</span> {formatValue(vehicle.wheels)}
+                </li>
               </ul>
             </div>
 
             <div className="vd-spec-section">
               <h4>Interior & Comfort</h4>
               <ul>
-                <li><span>Seats:</span> {vehicle.seats || "N/A"}</li>
-                <li><span>Upholstery:</span> {vehicle.interiorType || "N/A"}</li>
-                <li><span>AC:</span> {vehicle.hasAC ? "Yes" : "No"}</li>
-                <li><span>Power Windows:</span> {vehicle.powerWindows ? "Yes" : "No"}</li>
+                <li>
+                  <span>Seats:</span> {formatValue(vehicle.seats)}
+                </li>
+                <li>
+                  <span>Upholstery:</span> {formatValue(vehicle.interiorType)}
+                </li>
+                <li>
+                  <span>AC:</span> {vehicle.hasAC ? "Yes" : "No"}
+                </li>
+                <li>
+                  <span>Power Windows:</span>{" "}
+                  {vehicle.powerWindows ? "Yes" : "No"}
+                </li>
               </ul>
             </div>
 
             <div className="vd-spec-section">
               <h4>Technology</h4>
               <ul>
-                <li><span>Bluetooth:</span> {vehicle.bluetooth ? "Yes" : "No"}</li>
-                <li><span>Navigation:</span> {vehicle.navigation ? "Yes" : "No"}</li>
-                <li><span>Reverse Camera:</span> {vehicle.reverseCamera ? "Yes" : "No"}</li>
-                <li><span>Touchscreen:</span> {vehicle.hasScreen ? "Yes" : "No"}</li>
+                <li>
+                  <span>Bluetooth:</span> {vehicle.bluetooth ? "Yes" : "No"}
+                </li>
+                <li>
+                  <span>Navigation:</span> {vehicle.navigation ? "Yes" : "No"}
+                </li>
+                <li>
+                  <span>Reverse Camera:</span>{" "}
+                  {vehicle.reverseCamera ? "Yes" : "No"}
+                </li>
+                <li>
+                  <span>Touchscreen:</span> {vehicle.hasScreen ? "Yes" : "No"}
+                </li>
               </ul>
             </div>
           </div>
 
-          {/* CONDITION GRADING */}
+          <div className="vd-box">
+            <h3>Listing & Source Information</h3>
+            <div className="vd-spec-section">
+              <ul>
+                <li>
+                  <span>Status:</span> {formatValue(vehicle.status, "Available")}
+                </li>
+                <li>
+                  <span>Source:</span>{" "}
+                  {vehicle.source === "beforward" ? "Be Forward" : "Manual / Local"}
+                </li>
+                <li>
+                  <span>Last Synced:</span> {formatDate(vehicle.lastSyncedAt)}
+                </li>
+                <li>
+                  <span>Updated At Source:</span> {formatDate(vehicle.sourceUpdatedAt)}
+                </li>
+              </ul>
+            </div>
+
+            {vehicle.sourceUrl && (
+              <a
+                href={vehicle.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="vd-source-link"
+              >
+                View Original Listing
+              </a>
+            )}
+          </div>
+
           <div className="vd-grade-box">
             <h3>Condition Grading</h3>
             <div className="vd-grade-row">
               <div className="vd-grade-item">
                 <span>Exterior Grade</span>
-                <div className={`vd-grade-tag grade-${vehicle.exteriorGrade || 'B'}`}>
+                <div
+                  className={`vd-grade-tag grade-${vehicle.exteriorGrade || "B"}`}
+                >
                   {vehicle.exteriorGrade || "B"}
                 </div>
               </div>
 
               <div className="vd-grade-item">
                 <span>Interior Grade</span>
-                <div className={`vd-grade-tag grade-${vehicle.interiorGrade || 'B'}`}>
+                <div
+                  className={`vd-grade-tag grade-${vehicle.interiorGrade || "B"}`}
+                >
                   {vehicle.interiorGrade || "B"}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* VEHICLE HISTORY TIMELINE */}
           <div className="vd-history">
             <h3>Import History</h3>
 
@@ -249,7 +434,6 @@ const CustomerVehicleDetails = () => {
             </div>
           </div>
 
-          {/* LOAN CALCULATOR */}
           <div className="vd-box">
             <h3>Financing Calculator</h3>
 
@@ -264,7 +448,10 @@ const CustomerVehicleDetails = () => {
             <p>{depositPercent}% Deposit</p>
 
             <label>Repayment Months</label>
-            <select value={months} onChange={(e) => setMonths(Number(e.target.value))}>
+            <select
+              value={months}
+              onChange={(e) => setMonths(Number(e.target.value))}
+            >
               <option value="6">6 months</option>
               <option value="9">9 months</option>
               <option value="12">12 months</option>
@@ -272,60 +459,107 @@ const CustomerVehicleDetails = () => {
             </select>
 
             <div className="vd-finance">
-              <p>Loan Amount: <strong>KES {loan.toLocaleString()}</strong></p>
-              <p>Monthly Payment: <strong>KES {monthlyPay.toLocaleString()}</strong></p>
+              <p>
+                Loan Amount: <strong>KES {loan.toLocaleString()}</strong>
+              </p>
+              <p>
+                Monthly Payment: <strong>KES {monthlyPay.toLocaleString()}</strong>
+              </p>
             </div>
           </div>
 
-          {/* DUTY */}
           <div className="vd-box">
             <h3>KRA Duty Estimate</h3>
-            <p>Estimated Duty: <strong>KES {duty.toLocaleString()}</strong></p>
-            <p className="vd-note">KRA duty varies by valuation, engine size & year.</p>
+            <p>
+              Estimated Duty: <strong>KES {duty.toLocaleString()}</strong>
+            </p>
+            <p className="vd-note">
+              KRA duty varies by valuation, engine size & year.
+            </p>
           </div>
 
-          <button className="vd-request-btn"
-          onClick={() => setQuickViewVehicle(vehicle)} 
+          <div className="vd-box">
+            <h3>Media & Description</h3>
+            <div className="vd-spec-section">
+              <ul>
+                <li>
+                  <span>Gallery Images:</span> {displayImages.length}
+                </li>
+                <li>
+                  <span>360 / 3D View:</span> {hasSpinExperience ? "Available" : "N/A"}
+                </li>
+                <li>
+                  <span>Auction Sheet:</span> {vehicle.auctionSheetUrl ? "Available" : "N/A"}
+                </li>
+                <li>
+                  <span>Video:</span> {vehicle.videoUrl ? "Available" : "N/A"}
+                </li>
+              </ul>
+            </div>
+
+            <p className="vd-description-copy">
+              {vehicle.description ||
+                "No additional description has been added for this vehicle yet."}
+            </p>
+          </div>
+
+          <button
+            className="vd-request-btn"
+            onClick={() => setQuickViewVehicle(vehicle)}
           >
             Request This Import
           </button>
-
         </div>
       </div>
 
-      {/* 360° VIEWER */}
       {show360 && (
         <div className="vd-360-overlay" onClick={() => setShow360(false)}>
-          <div className="vd-360-modal">
-            <iframe
-              src={vehicle.model3dUrl}
-              title="3D Viewer"
-              frameBorder="0"
-            ></iframe>
+          <div
+            className={`vd-360-modal ${vehicle.model3dUrl ? "" : "gallery"}`.trim()}
+            onClick={(event) => event.stopPropagation()}
+          >
+            {vehicle.model3dUrl ? (
+              <iframe src={vehicle.model3dUrl} title="3D Viewer" frameBorder="0" />
+            ) : (
+              <div className="vd-spin-gallery">
+                {spinImages.map((img, idx) => (
+                  <img
+                    key={`${img.url}-${idx}`}
+                    src={img.url}
+                    alt={`${title} spin ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* AUCTION SHEET MODAL */}
       {showAuctionSheet && (
-        <div className="vd-auction-overlay" onClick={() => setShowAuctionSheet(false)}>
-          <div className="vd-auction-modal">
-            <img src={vehicle.auctionSheetUrl} alt="auction sheet" />
+        <div
+          className="vd-auction-overlay"
+          onClick={() => setShowAuctionSheet(false)}
+        >
+          <div
+            className="vd-auction-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {isAuctionPdf ? (
+              <iframe src={vehicle.auctionSheetUrl} title="auction sheet" />
+            ) : (
+              <img src={vehicle.auctionSheetUrl} alt="auction sheet" />
+            )}
           </div>
         </div>
       )}
 
-      {/* Modals */}
-          {quickViewVehicle && (
-            <VehicleQuickViewModal
-              vehicle={quickViewVehicle}
-              onClose={() => setQuickViewVehicle(null)}
-            />
-          )}
-
+      {quickViewVehicle && (
+        <VehicleQuickViewModal
+          vehicle={quickViewVehicle}
+          onClose={() => setQuickViewVehicle(null)}
+        />
+      )}
     </CustomerLayout>
-
-    
   );
 };
 

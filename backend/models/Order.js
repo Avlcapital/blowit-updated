@@ -28,6 +28,21 @@ const orderSchema = new mongoose.Schema(
     financedByAvlc: { type: Boolean, default: false },
     finalPaymentDone: { type: Boolean, default: false },
 
+    paymentStatus: {
+      type: String,
+      enum: ["UNPAID", "PENDING", "PARTIALLY_PAID", "PAID", "FAILED"],
+      default: "UNPAID",
+    },
+    paymentProvider: {
+      type: String,
+      enum: ["MPESA", "STRIPE"],
+    },
+    paymentRef: String,
+    paymentMeta: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
+
     status: {
       type: String,
       enum: [
@@ -44,6 +59,7 @@ const orderSchema = new mongoose.Schema(
 
     stageTimestamps: {
       depositPaidAt: Date,
+      balancePaidAt: Date,
       financedAt: Date,
       shippedAt: Date,
       arrivedAt: Date,
@@ -51,6 +67,10 @@ const orderSchema = new mongoose.Schema(
     },
 
     notes: String,
+
+    cancellationRequested: { type: Boolean, default: false },
+    cancellationReason: { type: String, default: "" },
+    cancellationRequestedAt: Date,
 
     shippingDocs: [
       {

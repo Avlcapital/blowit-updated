@@ -5,6 +5,7 @@ import morgan from "morgan";
 import connectDB from "./config/db.js";
 import { initSocket } from "./socket.js";
 import http from "http";
+import { stripeWebhook } from "./controllers/paymentController.js";
 
 import authRoutes from "./routes/authRoutes.js";
 import vehicleRoutes from "./routes/vehicleRoutes.js";
@@ -20,6 +21,13 @@ dotenv.config();
 
 const app = express();
 
+// Stripe webhook MUST use raw body and must be mounted before JSON parsing.
+app.post(
+  "/api/payments/stripe/webhook",
+  express.raw({ type: "application/json" }),
+  stripeWebhook
+);
+
 app.use(express.json());
 app.use(cors({origin: "*"}));
 app.use(morgan("dev"));
@@ -33,14 +41,6 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/customer", customerRoutes);
 app.use("/api/wishlist", wishlistRoutes);
-
-// Stripe webhook MUST use raw body
-app.post(
-  "/api/payments/stripe/webhook",
-  express.raw({ type: "application/json" }),
-  (req, res, next) => next()
-);
-
 
 // Default
 app.get("/", (req, res) => res.send("Blowit API is running..."));

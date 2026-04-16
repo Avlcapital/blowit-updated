@@ -4,6 +4,7 @@ import {
   createVehicle,
   getVehicles,
   getVehicleById,
+  getPublicVehicleById,
   updateVehicle,
   deleteVehicle,
   uploadVehicleImages,
@@ -63,5 +64,6 @@ router.post("/import/beforward", importFromBeForward);
 
 // Public list (if you want a separate endpoint like /public)
 router.get("/public/list", getPublicVehicles);
+router.get("/public/:id", getPublicVehicleById);
 
 export default router;

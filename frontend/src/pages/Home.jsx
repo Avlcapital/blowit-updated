@@ -21,7 +21,9 @@ const Home = () => {
   /* ------------------- Fetch trending vehicles ------------------- */
   const loadTrending = async () => {
     try {
-      const res = await api.get(`${BASE_URL}/api/vehicles?limit=4&sort=latest`);
+      const res = await api.get(
+        `${BASE_URL}/api/vehicles/public/list?limit=4&sort=latest`
+      );
       if (res.data.success) {
         setTrending(res.data.vehicles);
       }
@@ -38,11 +40,6 @@ const Home = () => {
   const handleSearch = () => {
     if (!search.trim()) return;
     navigate(`/vehicles?q=${encodeURIComponent(search)}`);
-  };
-
-  /* ------------------- Handle category click ------------------- */
-  const handleCategory = (brand) => {
-    navigate(`/vehicles?brand=${brand}`);
   };
 
   /* ------------------- Handle Request Import Security ------------------- */
@@ -152,7 +149,9 @@ const Home = () => {
                     {/* PUBLIC VIEW DETAILS */}
                     <button
                       className="book-btn"
-                      onClick={() => navigate(`/vehicle/${car._id}`)}
+                      onClick={() =>
+                        navigate(`/vehicle/${car._id}`, { state: { vehicle: car } })
+                      }
                     >
                       View Details
                     </button>

@@ -6,9 +6,18 @@
 .customer-main {
   margin-left: 240px;
   width: calc(100% - 240px);
+  min-width: 0;
   min-height: 100vh;
   background: #f5f7fa;
   transition: 0.3s ease;
+}
+
+.customer-content {
+  width: 100%;
+  min-width: 0;
+  padding: 1.25rem;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* Mobile FIX */
@@ -16,5 +25,9 @@
   .customer-main {
     margin-left: 0;
     width: 100%;
+  }
+
+  .customer-content {
+    padding: 1rem;
   }
 }
