@@ -12,7 +12,11 @@ export const getCustomerDashboard = async (req, res) => {
     // Pending payments (FIXED case)
     const pendingPayments = await Order.countDocuments({
       customer: customerId,
-      paymentStatus: "PENDING",
+      status: { $ne: "Cancelled" },
+      $or: [
+        { depositPaid: false },
+        { depositPaid: true, finalPaymentDone: false, balanceAmount: { $gt: 0 } },
+      ],
     });
 
     // Count uploaded shipping documents (FIXED field)

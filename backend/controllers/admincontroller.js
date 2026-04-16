@@ -9,6 +9,7 @@ export const getAdminSummary = async (req, res) => {
     const customersCount = await User.countDocuments({ role: "customer" });
     const ordersCount = await Order.countDocuments();
     const totalPayments = await Payment.aggregate([
+      { $match: { status: "success" } },
       { $group: { _id: null, total: { $sum: "$amount" } } },
     ]);
 

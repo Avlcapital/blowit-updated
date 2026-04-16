@@ -491,6 +491,26 @@ export const importFromBeForward = async (req, res) => {
   }
 };
 
+/* GET ONE (PUBLIC) */
+export const getPublicVehicleById = async (req, res) => {
+  try {
+    const vehicle = await Vehicle.findOne({
+      _id: req.params.id,
+      status: "Available",
+    });
+
+    if (!vehicle) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Vehicle not found" });
+    }
+
+    res.json({ success: true, vehicle });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 /* PUBLIC LIST (used by Landing page + PublicVehicles) */
 export const getPublicVehicles = async (req, res) => {
   try {

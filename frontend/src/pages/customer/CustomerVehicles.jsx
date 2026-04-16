@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Slider from "react-slick";
+import { useNavigate } from "react-router-dom";
 import {
   FaSearch,
   FaCarSide,
@@ -13,6 +14,7 @@ import {
 
 import api from "../../utils/api";
 import { BASE_URL } from "../../utils/config";
+import { normalizeVehicleMedia } from "../../utils/vehicleMedia";
 import CustomerLayout from "../../components/Customer/CustomerLayout";
 
 import VehicleQuickViewModal from "../../components/Customer/VehicleQuickViewModal";
@@ -23,7 +25,52 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import "../../styles/customer/CustomerVehicles.css";
 
+const buildVehiclePreview = (vehicle) => ({
+  _id: vehicle._id,
+  title: vehicle.title,
+  brand: vehicle.brand,
+  model: vehicle.model,
+  year: vehicle.year,
+  mileage: vehicle.mileage,
+  transmission: vehicle.transmission,
+  fuelType: vehicle.fuelType,
+  price: vehicle.price,
+  status: vehicle.status,
+  stockNumber: vehicle.stockNumber,
+  location: vehicle.location,
+  source: vehicle.source,
+  sourcePrice: vehicle.sourcePrice,
+  sourceCurrency: vehicle.sourceCurrency,
+  sourceUrl: vehicle.sourceUrl,
+  lastSyncedAt: vehicle.lastSyncedAt,
+  driveType: vehicle.driveType,
+  doors: vehicle.doors,
+  seats: vehicle.seats,
+  interiorType: vehicle.interiorType,
+  engineCapacity: vehicle.engineCapacity,
+  bodyType: vehicle.bodyType,
+  color: vehicle.color,
+  exteriorColor: vehicle.exteriorColor,
+  hasAC: vehicle.hasAC,
+  powerWindows: vehicle.powerWindows,
+  bluetooth: vehicle.bluetooth,
+  navigation: vehicle.navigation,
+  reverseCamera: vehicle.reverseCamera,
+  hasScreen: vehicle.hasScreen,
+  alloyWheels: vehicle.alloyWheels,
+  airbags: vehicle.airbags,
+  abs: vehicle.abs,
+  has360: vehicle.has360,
+  model3dUrl: vehicle.model3dUrl,
+  auctionSheetUrl: vehicle.auctionSheetUrl,
+  videoUrl: vehicle.videoUrl,
+  description: vehicle.description,
+  images: normalizeVehicleMedia(vehicle.images, 6, "large"),
+  spinImages: normalizeVehicleMedia(vehicle.spinImages, 12, "large"),
+});
+
 const CustomerVehicles = () => {
+  const navigate = useNavigate();
   const [vehicles, setVehicles] = useState([]);
   const [favourites, setFavourites] = useState([]);
 
@@ -57,7 +104,7 @@ const CustomerVehicles = () => {
         const favIds = res.data.favourites.map((x) => x._id);
         setFavourites(favIds);
       }
-    } catch (err) {
+    } catch {
       console.log("Failed to load favourites");
     }
   };
@@ -96,23 +143,23 @@ const CustomerVehicles = () => {
   const clearCompare = () => setCompareList([]);
 
   /* ---------------- FETCH VEHICLES ---------------- */
-  const fetchVehicles = async (overridePage) => {
+  const fetchVehicles = async (overridePage = page, nextFilters = filters) => {
     try {
       setLoading(true);
-      const activePage = overridePage || page;
-
       const params = new URLSearchParams({
-        page: activePage,
+        page: overridePage,
         limit: 12,
-        ...filters,
+        ...nextFilters,
       });
 
-      const res = await api.get(`${BASE_URL}/api/vehicles/?${params.toString()}`);
+      const res = await api.get(
+        `${BASE_URL}/api/vehicles/public/list?${params.toString()}`
+      );
 
       if (res.data.success) {
         setVehicles(res.data.vehicles);
         setPages(res.data.pages);
-        setPage(activePage);
+        setPage(overridePage);
       }
     } catch (err) {
       console.error("Browse vehicles failed", err);
@@ -124,13 +171,14 @@ const CustomerVehicles = () => {
   useEffect(() => {
     loadFavourites();
     fetchVehicles(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /* ---------------- FILTERS ---------------- */
-  const applyFilters = () => fetchVehicles(1);
+  const applyFilters = () => fetchVehicles(1, filters);
 
   const resetFilters = () => {
-    setFilters({
+    const clearedFilters = {
       q: "",
       brand: "",
       model: "",
@@ -139,8 +187,10 @@ const CustomerVehicles = () => {
       minYear: "",
       maxYear: "",
       sort: "latest",
-    });
-    fetchVehicles(1);
+    };
+
+    setFilters(clearedFilters);
+    fetchVehicles(1, clearedFilters);
   };
 
   /* ---------------- CAROUSEL ---------------- */
@@ -254,22 +304,34 @@ const CustomerVehicles = () => {
       ) : (
         <div className="cv-grid">
           {vehicles.map((v) => {
-            const mainImg = v.images?.[0]?.url || "/placeholder-car.jpg";
+            const galleryImages = normalizeVehicleMedia(v.images, 8, "large");
+            const mainImg = galleryImages[0]?.url || "/placeholder-car.jpg";
+            const previewVehicle = buildVehiclePreview(v);
 
             return (
               <div className="cv-card" key={v._id}>
                 {/* Image Block */}
                 <div className="cv-card-media">
-                  {v.images?.length > 0 ? (
+                  {galleryImages.length > 0 ? (
                     <Slider {...sliderSettings}>
-                      {v.images.map((img, idx) => (
+                      {galleryImages.map((img, idx) => (
                         <div key={idx}>
-                          <img src={img.url} alt={v.title || "Vehicle"} />
+                          <img
+                            src={img.url}
+                            alt={v.title || "Vehicle"}
+                            loading="lazy"
+                            decoding="async"
+                          />
                         </div>
                       ))}
                     </Slider>
                   ) : (
-                    <img src={mainImg} alt={v.title || "Vehicle"} />
+                    <img
+                      src={mainImg}
+                      alt={v.title || "Vehicle"}
+                      loading="lazy"
+                      decoding="async"
+                    />
                   )}
 
                   {/* Price tag */}
@@ -372,7 +434,9 @@ const CustomerVehicles = () => {
                     <button
                       className="cv-details-btn"
                       onClick={() =>
-                        (window.location.href = `/customer/vehicle/${v._id}`)
+                        navigate(`/customer/vehicle/${v._id}`, {
+                          state: { vehicle: previewVehicle },
+                        })
                       }
                     >
                       View Details

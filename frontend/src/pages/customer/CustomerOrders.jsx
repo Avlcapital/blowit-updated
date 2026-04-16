@@ -1,20 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   FaSearch,
   FaFilter,
   FaEye,
   FaFileAlt,
-  FaTimes,
+  FaMoneyBillWave,
 } from "react-icons/fa";
 
 import api from "../../utils/api";
 import { BASE_URL } from "../../utils/config";
 import CustomerLayout from "../../components/Customer/CustomerLayout";
 import OrderDetailsModal from "../../components/Customer/OrderDetailsModal";
+import OrderPaymentModal from "../../components/Customer/OrderPaymentModal";
+import { downloadPaymentReceipt } from "../../utils/apiOrders";
 
 import "../../styles/customer/CustomerOrders.css";
 
 const CustomerOrders = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [status, setStatus] = useState("all");
   const [sort, setSort] = useState("latest");
@@ -22,8 +27,11 @@ const CustomerOrders = () => {
   const [pages, setPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [paymentOrder, setPaymentOrder] = useState(null);
+  const [flashMessage, setFlashMessage] = useState(location.state?.flashMessage || "");
+  const autoDownloadedPaymentRef = useRef("");
 
-  const fetchOrders = async (targetPage = 1) => {
+  const fetchOrders = useCallback(async (targetPage = 1) => {
     try {
       setLoading(true);
 
@@ -48,21 +56,59 @@ const CustomerOrders = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [sort, status]);
 
   useEffect(() => {
     fetchOrders(1);
-    // eslint-disable-next-line
-  }, [status, sort]);
+  }, [fetchOrders]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const paymentState = params.get("payment");
+    const paymentId = params.get("paymentId");
+
+    if (!paymentState) {
+      if (location.state?.flashMessage) {
+        setFlashMessage(location.state.flashMessage);
+      }
+      return;
+    }
+
+    const successMessage =
+      paymentState === "success"
+        ? "Payment confirmed. Your receipt is being downloaded and has also been emailed."
+        : "Card payment was cancelled. You can retry from this page anytime.";
+
+    setFlashMessage(successMessage);
+    fetchOrders(1);
+
+    if (
+      paymentState === "success" &&
+      paymentId &&
+      autoDownloadedPaymentRef.current !== paymentId
+    ) {
+      autoDownloadedPaymentRef.current = paymentId;
+      downloadPaymentReceipt(paymentId).catch(() => {
+        setFlashMessage(
+          "Payment confirmed. Your receipt will appear in the order details shortly, and it has also been emailed."
+        );
+      });
+    }
+
+    navigate("/customer/orders", {
+      replace: true,
+      state: { flashMessage: successMessage },
+    });
+  }, [fetchOrders, location.search, location.state, navigate]);
 
   const statusBadgeClass = (s) => {
     if (!s) return "co-badge neutral";
     const v = s.toUpperCase();
     if (v === "PENDING") return "co-badge pending";
-    if (v === "APPROVED") return "co-badge approved";
-    if (["SHIPPING", "IN_TRANSIT"].includes(v)) return "co-badge shipping";
-    if (["COMPLETED"].includes(v)) return "co-badge completed";
-    if (["CANCELLED", "REJECTED"].includes(v)) return "co-badge cancelled";
+    if (["PROCESSING", "FINANCED"].includes(v)) return "co-badge approved";
+    if (["SHIPPED", "ARRIVED"].includes(v)) return "co-badge shipping";
+    if (v === "COMPLETED") return "co-badge completed";
+    if (v === "CANCELLED") return "co-badge cancelled";
     return "co-badge neutral";
   };
 
@@ -75,6 +121,8 @@ const CustomerOrders = () => {
         </div>
       </div>
 
+      {flashMessage && <div className="co-flash">{flashMessage}</div>}
+
       {/* Filters row */}
       <div className="co-filters-row">
         <div className="co-filter-group">
@@ -84,12 +132,13 @@ const CustomerOrders = () => {
             onChange={(e) => setStatus(e.target.value)}
           >
             <option value="all">All statuses</option>
-            <option value="PENDING">Pending</option>
-            <option value="APPROVED">Approved</option>
-            <option value="SHIPPING">Shipping</option>
-            <option value="COMPLETED">Completed</option>
-            <option value="CANCELLED">Cancelled</option>
-            <option value="REJECTED">Rejected</option>
+            <option value="Pending">Pending</option>
+            <option value="Processing">Processing</option>
+            <option value="Financed">Financed</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Arrived">Arrived</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
           </select>
         </div>
 
@@ -131,6 +180,13 @@ const CustomerOrders = () => {
                 const v = o.vehicle || {};
                 const orderCode = `BLW-${String(o._id).slice(-6).toUpperCase()}`;
                 const docsCount = o.shippingDocs?.length || 0;
+                const balanceDue = Number(o.balanceAmount || 0);
+                const needsDeposit = !o.depositPaid;
+                const needsBalance =
+                  o.depositPaid && !o.finalPaymentDone && balanceDue > 0;
+                const paymentButtonLabel = needsDeposit
+                  ? "Pay Deposit"
+                  : "Complete Payment";
 
                 return (
                   <tr key={o._id}>
@@ -157,6 +213,21 @@ const CustomerOrders = () => {
                       <span className={statusBadgeClass(o.status)}>
                         {o.status}
                       </span>
+                      <div
+                        className={`co-payment-state ${
+                          needsDeposit
+                            ? "warning"
+                            : needsBalance
+                            ? "info"
+                            : "success"
+                        }`}
+                      >
+                        {needsDeposit
+                          ? "Deposit pending"
+                          : needsBalance
+                          ? "Balance pending"
+                          : "Fully paid"}
+                      </div>
                       {o.cancellationRequested && (
                         <div className="co-cancel-tag">
                           Cancellation requested
@@ -178,12 +249,22 @@ const CustomerOrders = () => {
                       )}
                     </td>
                     <td>
-                      <button
-                        className="co-view-btn"
-                        onClick={() => setSelectedOrder(o)}
-                      >
-                        <FaEye /> View
-                      </button>
+                      <div className="co-row-actions">
+                        <button
+                          className="co-view-btn"
+                          onClick={() => setSelectedOrder(o)}
+                        >
+                          <FaEye /> View
+                        </button>
+                        {(needsDeposit || needsBalance) && (
+                          <button
+                            className="co-pay-inline-btn"
+                            onClick={() => setPaymentOrder(o)}
+                          >
+                            <FaMoneyBillWave /> {paymentButtonLabel}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -219,6 +300,15 @@ const CustomerOrders = () => {
         <OrderDetailsModal
           order={selectedOrder}
           onClose={() => setSelectedOrder(null)}
+          onUpdated={() => fetchOrders(page)}
+          onPayOrder={(orderToPay) => setPaymentOrder(orderToPay)}
+        />
+      )}
+
+      {paymentOrder && (
+        <OrderPaymentModal
+          order={paymentOrder}
+          onClose={() => setPaymentOrder(null)}
           onUpdated={() => fetchOrders(page)}
         />
       )}

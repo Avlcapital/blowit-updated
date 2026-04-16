@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import './App.css'
 import { Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
@@ -110,8 +109,14 @@ function App() {
           }
         />
 
-
-        <Route path="/customer/vehicle/:id" element={<CustomerVehicleDetails />} />
+        <Route
+          path="/customer/vehicle/:id"
+          element={
+            <CustomerRoute>
+              <CustomerVehicleDetails />
+            </CustomerRoute>
+          }
+        />
 
 
       </Routes>

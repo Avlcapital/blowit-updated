@@ -1,4 +1,5 @@
 import Order from "../models/Order.js";
+import Payment from "../models/Payment.js";
 import Vehicle from "../models/Vehicle.js";
 import cloudinary from "../config/cloudinary.js";
 import { sendMail } from "../utils/email.js";
@@ -12,6 +13,9 @@ export const createOrder = async (req, res) => {
   try {
     const { vehicleId, fullName, phone, email, depositPercent } = req.body;
     const customerId = req.user._id;
+    const resolvedFullName = fullName || req.user.name || "Customer";
+    const resolvedPhone = phone || req.user.phone || "";
+    const resolvedEmail = email || req.user.email || "";
 
     const vehicle = await Vehicle.findById(vehicleId);
     if (!vehicle) {
@@ -27,9 +31,9 @@ export const createOrder = async (req, res) => {
     const order = await Order.create({
       vehicle: vehicleId,
       customer: customerId,
-      fullName,
-      phone,
-      email,
+      fullName: resolvedFullName,
+      phone: resolvedPhone,
+      email: resolvedEmail,
       depositPercent: dp,
       totalPrice: price,
       depositAmount,
@@ -43,6 +47,7 @@ export const createOrder = async (req, res) => {
       vehicleTitle: `${vehicle.title || `${vehicle.brand} ${vehicle.model}`} (${vehicle.year || ""})`,
       totalPrice: price,
       depositAmount,
+      depositPercent: dp,
     });
 
     sendMail({ to: req.user.email, subject, html });
@@ -71,11 +76,46 @@ export const getAllOrders = async (req, res) => {
 /*GET CUSTOMER’S ORDERS*/
 export const getMyOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ customer: req.user._id }).populate(
-      "vehicle",
-      "title brand model year price images"
-    );
-    res.json({ success: true, orders });
+    const {
+      status,
+      page = 1,
+      limit = 10,
+      sort = "latest",
+    } = req.query;
+
+    const query = { customer: req.user._id };
+    if (status && status !== "all") {
+      query.status = status;
+    }
+
+    const sortMap = {
+      latest: { createdAt: -1 },
+      oldest: { createdAt: 1 },
+    };
+
+    const parsedPage = Math.max(Number(page) || 1, 1);
+    const parsedLimit = Math.max(Number(limit) || 10, 1);
+    const skip = (parsedPage - 1) * parsedLimit;
+
+    const [orders, total] = await Promise.all([
+      Order.find(query)
+        .populate(
+          "vehicle",
+          "title brand model year price images fuelType transmission stockNumber"
+        )
+        .sort(sortMap[sort] || sortMap.latest)
+        .skip(skip)
+        .limit(parsedLimit),
+      Order.countDocuments(query),
+    ]);
+
+    res.json({
+      success: true,
+      orders,
+      total,
+      page: parsedPage,
+      pages: Math.ceil(total / parsedLimit),
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -142,7 +182,11 @@ export const getMyOrderById = async (req, res) => {
         .json({ success: false, message: "Order not found" });
     }
 
-    res.json({ success: true, order });
+    const payments = await Payment.find({ orderId: order._id })
+      .sort({ createdAt: -1 })
+      .select("type method amount currency status receiptNumber paidAt createdAt txRef gatewayMeta");
+
+    res.json({ success: true, order, payments });
   } catch (err) {
     console.error("getMyOrderById error:", err);
     res.status(500).json({ success: false, message: err.message });

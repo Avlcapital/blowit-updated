@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Slider from "react-slick";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import {
   FaSearch,
   FaCarSide,
   FaStopwatch,
   FaGasPump,
-  FaEye,
   FaPlayCircle,
 } from "react-icons/fa";
 
@@ -36,23 +35,23 @@ const PublicVehicles = () => {
   });
 
   // ----------------------- Fetch Public Vehicles -----------------------
-  const fetchVehicles = async (overridePage) => {
+  const fetchVehicles = async (overridePage = page, nextFilters = filters) => {
     try {
       setLoading(true);
-      const activePage = overridePage || page;
-
       const params = new URLSearchParams({
-        page: activePage,
+        page: overridePage,
         limit: 12,
-        ...filters,
+        ...nextFilters,
       });
 
-      const res = await api.get(`${BASE_URL}/api/vehicles?${params.toString()}`);
+      const res = await api.get(
+        `${BASE_URL}/api/vehicles/public/list?${params.toString()}`
+      );
 
       if (res.data.success) {
         setVehicles(res.data.vehicles);
         setPages(res.data.pages);
-        setPage(activePage);
+        setPage(overridePage);
       }
     } catch (err) {
       console.error("Public vehicle fetch failed:", err);
@@ -63,6 +62,7 @@ const PublicVehicles = () => {
 
   useEffect(() => {
     fetchVehicles(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ----------------------- Slider Settings -----------------------
@@ -161,12 +161,12 @@ const PublicVehicles = () => {
           <option value="oldest">Oldest</option>
         </select>
 
-        <button className="pv-btn" onClick={() => fetchVehicles(1)}>Apply</button>
+        <button className="pv-btn" onClick={() => fetchVehicles(1, filters)}>Apply</button>
 
         <button
           className="pv-btn ghost"
           onClick={() => {
-            setFilters({
+            const clearedFilters = {
               q: "",
               brand: "",
               model: "",
@@ -175,8 +175,9 @@ const PublicVehicles = () => {
               minYear: "",
               maxYear: "",
               sort: "latest",
-            });
-            fetchVehicles(1);
+            };
+            setFilters(clearedFilters);
+            fetchVehicles(1, clearedFilters);
           }}
         >
           Reset
@@ -215,7 +216,9 @@ const PublicVehicles = () => {
                   {(v.has360 || v.model3dUrl) && (
                     <button
                       className="pv-360-btn"
-                      onClick={() => navigate(`/vehicle/${v._id}`)}
+                      onClick={() =>
+                        navigate(`/vehicle/${v._id}`, { state: { vehicle: v } })
+                      }
                     >
                       <FaPlayCircle /> 360° View
                     </button>
@@ -235,7 +238,9 @@ const PublicVehicles = () => {
                     {/* PUBLIC VIEW DETAILS (NO LOGIN REQUIRED) */}
                     <button
                       className="pv-details-btn"
-                      onClick={() => navigate(`/vehicle/${v._id}`)}
+                      onClick={() =>
+                        navigate(`/vehicle/${v._id}`, { state: { vehicle: v } })
+                      }
                     >
                       View Details
                     </button>
