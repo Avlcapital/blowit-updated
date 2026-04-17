@@ -1,7 +1,7 @@
 const brand = {
   name: "Blowit by AVLC Group",
-  site: "https://blowit.africa",
-  supportEmail: "support@blowit.africa",
+  site: "https://blowitafrica.com",
+  supportEmail: "support@blowitafrica.com",
 };
 
 const wrap = (title, body) => `
